@@ -40,6 +40,7 @@ function absolute(x) {
 function drawPath(svg, path, startX, startY, endX, endY) {
     // get the path's stroke width (if one wanted to be  really precize, one could use half the stroke size)
     var stroke =  parseFloat(path.attr("stroke-width"));
+    console.log(path);
     // check if the svg is big enough to draw the path, if not, set heigh/width
     if (svg.attr("height") <  endY)                 svg.attr("height", endY + stroke);
     if (svg.attr("width" ) < (startX + stroke) )    svg.attr("width", (startX + stroke));
@@ -84,7 +85,7 @@ function connectElements(svg, path, startElem, endElem) {
 }
 
 function connectChild(svg, path, startElem, endElem) {
-    var svgContainer= $("#svgContainer");
+    var svgContainer= svg;
 
     // if first element is lower than the second, swap!
     if(startElem.offset().top > endElem.offset().top){
@@ -115,24 +116,39 @@ function connectChild(svg, path, startElem, endElem) {
 
 }
 
-
-
-
-function connectAll() {
-    // connect all the paths you want!
-    connectChild($("#svg1"), $("#path1"), $("#block1"), $("#block2"));
-    connectChild($("#svg1"), $("#path2"), $("#block1"), $("#block3"));
+function createPath(svg, id){
     
-
+    path = document.createElementNS("http://www.w3.org/2000/svg","path");
+    path.setAttribute("id",id);
+    path.setAttribute("d","M0 0");
+    path.setAttribute("stroke","#000");
+    path.setAttribute("fill","none");
+    path.setAttribute("stroke-width","3px");
+    document.getElementById("svg1").appendChild(path);
 }
 
+function connectChildNode(idparent, idchild){
+    svg = $("#svg1");
+    createPath(svg,`path${idchild}`);
+    path=$(`#path${idchild}`);
+    
+    startElem = $(`#block${idparent} .parent .node .title`).first();
+    console.log(startElem.html())
+    endElem = $(`#block${idchild} .parent .node .title`).first();
+    console.log(endElem.html())
+    connectChild(svg, path, startElem, endElem)
+}
+
+
+
+
 function addHTMLBlock(el,id,title){
-    console.log("Кук");
+    
     htmlblock=`
-    <div class="block" id="block-${id}">
+    <div class="block" id="block${id}">
         <div class="parent">
             <div class="node">
-                <div class="title" id="block2">
+                <div class="title">
                     <div class="text">
                         ${title}
                     </div>
@@ -166,9 +182,16 @@ function addHTMLBlock(el,id,title){
 
 }
 
+function addChildBlock(idparent,id,title){
+    parent = $(`#block${idparent} .childrens `).first();
+    addHTMLBlock(parent,id,title);
+}
+
+
+
 function addHTMLFunct(el,id,title){
     htmlblock=`
-    <div class="funct" id="funct-${id}">
+    <div class="funct" id="funct${id}">
 
               <div class="title">
                 <div class="text">
@@ -189,14 +212,25 @@ function addHTMLFunct(el,id,title){
               </div>
 
     </div>`;
+    el.append(htmlblock);
     
+}
+
+function addListFunct (idel, listfuncts){
+    el = $(`#block${idel} .parent .list-funct `).first();
     
+    listfuncts.forEach(function(element) {
+        
+        addHTMLFunct(el, element.id, element.title);
+    });
 }
 
 
 
 $(document).ready(function() {
     // reset svg each time 
+    $("#svg1").attr("height", "0");
+    $("#svg1").attr("width", "0");
 
     data = {
         id:0,
@@ -205,31 +239,54 @@ $(document).ready(function() {
             {
                 id:1,
                 title:"Блок 1",
+                listfunct:[
+                    {
+                    id:1,
+                    title:"Функция 1"
+                }],
                 children:[
                 {
                     id:2,
                     title:"Блок 1 - 1",
-                    children:[]
+                    children:[],
+                    listfunct:[]
                 },
                 {
                     id:3,
                     title:"Блок 1 - 2",
-                    children:[]
+                    children:[],
+                    listfunct:[]
                 }, 
                 ]
             },
             {
                 id:4,
                 title:"Блок 2",
+                listfunct:[],
                 children:[
                 {
                     id:5,
                     title:"Блок 2 - 1",
+                    listfunct:[],
                     children:[
                         {
                             id:6,
                             title:"Блок 2 - 1 - 1",
-                            children:[]
+                            children:[],
+                            listfunct:[
+                                {
+                                    id:2,
+                                    title:"Функция 1"
+                                },
+                                {
+                                    id:3,
+                                    title:"Функция 2"
+                                },
+                                {
+                                    id:4,
+                                    title:"Функция 2"
+                                }
+                            ]
                         }
                     ]
                 } 
@@ -237,18 +294,40 @@ $(document).ready(function() {
             }
         ]
     }
-
-    $("#svg1").attr("height", "0");
-    $("#svg1").attr("width", "0");
-    addHTMLBlock($("#tree"),1,"Блок 1");
-
+    
     tree = new TreeModel();
     root = tree.parse(data);
 
     root.walk(function(node){
-        console.log(`Имя : ${node.model.title}`);
-        console.log(`Путь : ${node.getPath()}`);
+        id = node.model.id;
+        title = node.model.title;
+        listfunct = node.model.listfunct;
+
+        console.log(`Имя : ${title}`);
+        
+        path = node.getPath();
+        console.log(`Путь : `,path);
+        
+        if(path.length === 2)
+        {
+            addHTMLBlock($("#tree"),id,title);
+            addListFunct(id,listfunct);
+            
+        }
+        else if(path.length >= 3)
+        {
+            idparent = path[path.length - 2].model.id;
+            addChildBlock(idparent, id, title);
+            connectChildNode(idparent,id);
+            addListFunct(id,listfunct);
+        }
+        
+        
+
     });
+
+    
+
     
 });
 
