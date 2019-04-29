@@ -121,21 +121,140 @@ function connectChild(svg, path, startElem, endElem) {
 function connectAll() {
     // connect all the paths you want!
     connectChild($("#svg1"), $("#path1"), $("#block1"), $("#block2"));
-    
+    connectChild($("#svg1"), $("#path2"), $("#block1"), $("#block3"));
     
 
 }
 
+function addHTMLBlock(el,id,title){
+    console.log("Кук");
+    htmlblock=`
+    <div class="block" id="block-${id}">
+        <div class="parent">
+            <div class="node">
+                <div class="title" id="block2">
+                    <div class="text">
+                        ${title}
+                    </div>
+                </div>
+                <div class="tool">
+                    <button>
+                    Информация
+                    </button>
+                    <button>
+                    Добавить
+                    </button>
+                    <button>
+                    Удалить
+                    </button>
+                    <button>
+                    Редактировать
+                    </button>
+                </div>
+            </div>
+
+            <div class="list-funct">
+            </div>
+
+        </div>
+
+        <div class="childrens">
+        </div>
+    </div>`;
+    
+    el.append(htmlblock);
+
+}
+
+function addHTMLFunct(el,id,title){
+    htmlblock=`
+    <div class="funct" id="funct-${id}">
+
+              <div class="title">
+                <div class="text">
+                  ${title}
+                </div>
+              </div>
+
+              <div class="tool">
+                <button>
+                 Информация
+                </button>
+                <button>
+                 Удалить
+                </button>
+                <button>
+                 Редактировать
+                </button>
+              </div>
+
+    </div>`;
+    
+    
+}
+
+
+
 $(document).ready(function() {
     // reset svg each time 
+
+    data = {
+        id:0,
+        title:"Начало дерева",
+        children:[
+            {
+                id:1,
+                title:"Блок 1",
+                children:[
+                {
+                    id:2,
+                    title:"Блок 1 - 1",
+                    children:[]
+                },
+                {
+                    id:3,
+                    title:"Блок 1 - 2",
+                    children:[]
+                }, 
+                ]
+            },
+            {
+                id:4,
+                title:"Блок 2",
+                children:[
+                {
+                    id:5,
+                    title:"Блок 2 - 1",
+                    children:[
+                        {
+                            id:6,
+                            title:"Блок 2 - 1 - 1",
+                            children:[]
+                        }
+                    ]
+                } 
+                ]
+            }
+        ]
+    }
+
     $("#svg1").attr("height", "0");
     $("#svg1").attr("width", "0");
-    connectAll();
+    addHTMLBlock($("#tree"),1,"Блок 1");
+
+    tree = new TreeModel();
+    root = tree.parse(data);
+
+    root.walk(function(node){
+        console.log(`Имя : ${node.model.title}`);
+        console.log(`Путь : ${node.getPath()}`);
+    });
+    
 });
 
 $(window).resize(function () {
     // reset svg each time 
     $("#svg1").attr("height", "0");
     $("#svg1").attr("width", "0");
-    connectAll();
+    
 });
