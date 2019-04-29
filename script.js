@@ -333,7 +333,6 @@ $(document).ready(function() {
 
 $(window).resize(function () {
     // reset svg each time 
-    $("#svg1").attr("height", "0");
-    $("#svg1").attr("width", "0");
+    
     
 });
