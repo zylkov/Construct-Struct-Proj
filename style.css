@@ -1,0 +1,80 @@
+:link,:visited { text-decoration:none }
+ul,ol { list-style:none }
+h1,h2,h3,h4,h5,h6,pre,code { font-size:1em; }
+ul,ol,li,h1,h2,h3,h4,h5,h6,pre,form,body,html,p,blockquote,fieldset,input
+{ margin:0; padding:0 }
+a img,:link img,:visited img { border:none }
+address { font-style:normal }
+
+#svgContainer {
+	z-index: -10;
+	position: absolute;
+	opacity: 0.5;
+}
+
+.node .title {
+  width: 100px;
+  height: 100px;
+  background-color: green;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.title .text {
+  text-align: center;
+}
+
+.tool {
+  width: 120px;
+  margin-left: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.tool button {
+  margin-bottom: 3px;
+}
+
+.node {
+  display: inline-flex;
+  float: left;
+  margin-right: 20px;
+  background-color: rgba(116, 186, 2, 0.5);;
+}
+
+.list-funct {
+  height: 100px;
+}
+
+.parent {
+  width: 100%;
+  display: inline-block;
+}
+
+.funct .title {
+  width: 100px;
+  height: 100px;
+  background-color: green;
+  border-radius: 15%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.funct {
+  display: inline-flex;
+  margin-right: 10px;
+  background-color: pink;
+}
+
+.childrens {
+  margin-left: 130px;
+}
+
+.block {
+  margin-top: 20px;
+}
+
