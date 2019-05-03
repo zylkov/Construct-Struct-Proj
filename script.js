@@ -40,7 +40,7 @@ function absolute(x) {
 function drawPath(svg, path, startX, startY, endX, endY) {
     // get the path's stroke width (if one wanted to be  really precize, one could use half the stroke size)
     var stroke =  parseFloat(path.attr("stroke-width"));
-    console.log(path);
+    
     // check if the svg is big enough to draw the path, if not, set heigh/width
     if (svg.attr("height") <  endY)                 svg.attr("height", endY + stroke);
     if (svg.attr("width" ) < (startX + stroke) )    svg.attr("width", (startX + stroke));
@@ -133,14 +133,25 @@ function connectChildNode(idparent, idchild){
     path=$(`#path${idchild}`);
     
     startElem = $(`#block${idparent} .parent .node .title`).first();
-    console.log(startElem.html())
+    
     endElem = $(`#block${idchild} .parent .node .title`).first();
-    console.log(endElem.html())
-    connectChild(svg, path, startElem, endElem)
+   
+    connectChild(svg, path, startElem, endElem);
 }
 
+function removeConnectNode(idchild){
+    path=$(`#path${idchild}`);
+    path.remove();
+}
 
+function updateConnectChildNode(idparent, idchild){
+    svg = $("#svg1");
+    path=$(`#path${idchild}`);
 
+    startElem = $(`#block${idparent} .parent .node .title`).first();
+    endElem = $(`#block${idchild} .parent .node .title`).first();
+    connectChild(svg, path, startElem, endElem);
+}
 
 function addHTMLBlock(el,id,title){
     
@@ -157,10 +168,10 @@ function addHTMLBlock(el,id,title){
                     <button>
                     Информация
                     </button>
-                    <button>
+                    <button class="btn-addchild">
                     Добавить
                     </button>
-                    <button>
+                    <button class="btn-remove">
                     Удалить
                     </button>
                     <button>
@@ -182,11 +193,16 @@ function addHTMLBlock(el,id,title){
 
 }
 
-function addChildBlock(idparent,id,title){
+function showChildBlock(idparent,id,title){
     parent = $(`#block${idparent} .childrens `).first();
     addHTMLBlock(parent,id,title);
 }
 
+
+function removeBlock (id){
+    block = $(`#block${id}`);
+    block.remove();
+}
 
 
 function addHTMLFunct(el,id,title){
@@ -216,7 +232,7 @@ function addHTMLFunct(el,id,title){
     
 }
 
-function addListFunct (idel, listfuncts){
+function showListFunct (idel, listfuncts){
     el = $(`#block${idel} .parent .list-funct `).first();
     
     listfuncts.forEach(function(element) {
@@ -225,6 +241,97 @@ function addListFunct (idel, listfuncts){
     });
 }
 
+function showTree(tree){
+    
+    tree.walk(function(node){
+        id = node.model.id;
+        title = node.model.title;
+        listfunct = node.model.listfunct;
+
+        console.log(`Имя : ${title}`);
+        
+        path = node.getPath();
+        console.log(`Путь : `,path);
+        
+        if(path.length === 2)
+        {
+            addHTMLBlock($("#tree"),id,title);
+            showListFunct(id,listfunct);
+            
+        }
+        else if(path.length >= 3)
+        {
+            idparent = node.parent.model.id;
+            showChildBlock(idparent, id, title);
+            connectChildNode(idparent,id);
+            showListFunct(id,listfunct);
+        }
+        
+        
+
+    });
+}
+
+function updatePath(tree){
+    
+    tree.walk(function(node){
+        path = node.getPath();
+        
+        if(path.length >= 3){
+            id = node.model.id;
+            idparent = node.parent.model.id;
+            updateConnectChildNode(idparent,id);
+        }
+    });
+}
+
+function addChildNode(tree,root,idparent,id,title){
+    console.log("Входящие параметры",{tree,root,idparent,id,title});
+
+    node = tree.parse({id,title,children:[],listfunct:[]});
+    nodeparent = root.first({strategy: 'post'}, function (node) {
+        return node.model.id === idparent;
+    });
+
+    nodeparent.addChild(node);
+    return true;
+}
+
+function getChildrensNode(tree, root, id){
+    node = root.first({strategy: 'post'}, function (node) {
+        return node.model.id === id;
+    });
+    return node.children;
+}
+
+function getParentNode(tree, root, id){
+    node = root.first({strategy: 'post'}, function (node) {
+        return node.model.id === id;
+    });
+    return node.parent;
+}
+
+function removeNode(tree, root, id){
+    
+    node = root.first({strategy: 'post'}, function (node) {
+        return node.model.id === id;
+    });
+    
+    node.drop();
+
+    return true;
+}
+
+var ID = function () {
+    // Math.random should be unique because of its seeding algorithm.
+    // Convert it to base 36 (numbers + letters), and grab the first 9 characters
+    // after the decimal.
+    return '_' + Math.random().toString(36).substr(2, 9);
+  };
+
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min)) + min;
+ }
 
 
 $(document).ready(function() {
@@ -298,41 +405,87 @@ $(document).ready(function() {
     tree = new TreeModel();
     root = tree.parse(data);
 
-    root.walk(function(node){
-        id = node.model.id;
-        title = node.model.title;
-        listfunct = node.model.listfunct;
+    showTree(root);
+    setListnerOnTool(tree,root);
 
-        console.log(`Имя : ${title}`);
+    $("#tree").arrive(".block", function(newitem){
         
-        path = node.getPath();
-        console.log(`Путь : `,path);
+        setListnerOnTool(tree,root, false, $(newitem));
         
-        if(path.length === 2)
-        {
-            addHTMLBlock($("#tree"),id,title);
-            addListFunct(id,listfunct);
-            
-        }
-        else if(path.length >= 3)
-        {
-            idparent = path[path.length - 2].model.id;
-            addChildBlock(idparent, id, title);
-            connectChildNode(idparent,id);
-            addListFunct(id,listfunct);
-        }
-        
-        
-
     });
-
     
 
-    
+
+
 });
 
-$(window).resize(function () {
-    // reset svg each time 
+function setListnerOnTool(tree,root,all = true, node = null){
+
+    button = 
+    function(tag){
+       return all ? $(tag) : node.find(tag);
+    }
+
     
+
+    button(".btn-addchild").click(function(){
+        
+        idNode = getIdNodeChild($(this));
+        result = prompt("Введите название блока:", "Нет названия");
     
-});
+        newdata = {id:getRandomInt(10,100),title:result};
+        
+        addChildNode(tree,root,idNode,newdata.id,newdata.title);
+        showChildBlock(idNode,newdata.id,newdata.title);
+        connectChildNode(idNode,newdata.id);
+        updatePath(root);
+        
+    });
+    
+    button(".btn-remove").click(function(){
+
+        result = confirm("Вы точно хотите удалить блок?");
+
+        if(result){
+            result = confirm("Вы хотите удалить дочерние объекты блока ?");
+
+            idNode = getIdNodeChild($(this));
+
+            console.log("Удаление ДО: ",root);
+            childrens = getChildrensNode(tree, root, idNode);
+            idParent = getParentNode(tree, root, idNode).model.id;
+
+            childrens.forEach(function(node){
+                removeConnectNode(node.model.id);
+                removeBlock(node.model.id);
+            });
+            removeConnectNode(idNode);
+            removeBlock(idNode);
+
+            removeNode(tree, root, idNode);
+
+            console.log("Удаление После: ",root);
+
+            if(!result){
+
+                childrens.forEach(function(node){
+                    console.log("Привет параметр",root);
+                    addChildNode(tree, root, idParent, node.model.id, node.model.title);
+                    showChildBlock(idParent, node.model.id, node.model.title);
+                    connectChildNode(idParent, node.model.id);
+                });
+            }
+            updatePath(root);
+        }
+    });
+}
+
+function getIdNodeChild(jqblockchild){
+    parent = jqblockchild.parents(".block").eq(0);
+    idparent = parent.attr("id");
+    id = parseInt(idparent.replace("block",""));
+    return id
+
+}
+
+
