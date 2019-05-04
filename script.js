@@ -441,31 +441,45 @@ function setListnerOnTool(tree,root,all = true, node = null){
         updatePath(root);
         
     });
-    
+    // TODO: исправить ошибку с несуществующим родителем
     button(".btn-remove").click(function(){
 
         result = confirm("Вы точно хотите удалить блок?");
 
         if(result){
-            result = confirm("Вы хотите удалить дочерние объекты блока ?");
-
             idNode = getIdNodeChild($(this));
+            result = true;
 
             console.log("Удаление ДО: ",root);
+
             childrens = getChildrensNode(tree, root, idNode);
             idParent = getParentNode(tree, root, idNode).model.id;
+            // если дети есть
+            if(childrens.length > 0){
+                result = confirm("Вы хотите удалить дочерние объекты блока ?");
 
-            childrens.forEach(function(node){
-                removeConnectNode(node.model.id);
-                removeBlock(node.model.id);
-            });
+                childrens.forEach(function(node){
+                    removeBlock(node.model.id);
+                });
+                // удаление линий у дочерних и их зависимых блоков 
+                removeConnectChildNodes = function(childrens){
+                    childrens.forEach(function(node){
+                        removeConnectNode(node.model.id);
+                        nodeChildren = getChildrensNode(tree, root, node.model.id);
+
+                        if(nodeChildren.length > 0)
+                            removeConnectChildNodes(nodeChildren);
+                    });
+                }
+
+                removeConnectChildNodes(childrens);
+            }
             removeConnectNode(idNode);
             removeBlock(idNode);
 
             removeNode(tree, root, idNode);
 
             console.log("Удаление После: ",root);
-
             if(!result){
 
                 childrens.forEach(function(node){
