@@ -174,7 +174,7 @@ function addHTMLBlock(el,id,title){
                     <button class="btn-remove">
                     Удалить
                     </button>
-                    <button>
+                    <button class="btn-editchild">
                     Редактировать
                     </button>
                 </div>
@@ -285,10 +285,10 @@ function updatePath(tree){
     });
 }
 
-function addChildNode(tree,root,idparent,id,title){
+function addChildNode(tree,root,idparent,id,title,children=[]){
     console.log("Входящие параметры",{tree,root,idparent,id,title});
 
-    node = tree.parse({id,title,children:[],listfunct:[]});
+    node = tree.parse({id,title,children,listfunct:[]});
     nodeparent = root.first({strategy: 'post'}, function (node) {
         return node.model.id === idparent;
     });
@@ -441,7 +441,7 @@ function setListnerOnTool(tree,root,all = true, node = null){
         updatePath(root);
         
     });
-    // TODO: исправить ошибку с несуществующим родителем
+    
     button(".btn-remove").click(function(){
 
         result = confirm("Вы точно хотите удалить блок?");
@@ -453,7 +453,8 @@ function setListnerOnTool(tree,root,all = true, node = null){
             console.log("Удаление ДО: ",root);
 
             childrens = getChildrensNode(tree, root, idNode);
-            idParent = getParentNode(tree, root, idNode).model.id;
+            parentNode = getParentNode(tree, root, idNode)
+            idParent = parentNode.model.id;
             // если дети есть
             if(childrens.length > 0){
                 result = confirm("Вы хотите удалить дочерние объекты блока ?");
@@ -479,15 +480,36 @@ function setListnerOnTool(tree,root,all = true, node = null){
 
             removeNode(tree, root, idNode);
 
-            console.log("Удаление После: ",root);
+            // Добавления дочерних объектов на место удаленного родителя
             if(!result){
-
+                
                 childrens.forEach(function(node){
-                    console.log("Привет параметр",root);
-                    addChildNode(tree, root, idParent, node.model.id, node.model.title);
-                    showChildBlock(idParent, node.model.id, node.model.title);
-                    connectChildNode(idParent, node.model.id);
+                    addChildNode(tree, root, idParent, node.model.id, node.model.title, node.model.children);
                 });
+      
+                showPartTree = function(childrens, parentNode){
+                    childrens.forEach(function(node){
+                        id = node.model.id;
+                        title = node.model.title;
+                        listfunct = node.model.listfunct;
+                        path = parentNode.getPath(); 
+
+                        console.log("Путь удаленного ",path);
+                        if(path.length === 1){
+                            addHTMLBlock($("#tree"),id,title);
+                            showListFunct(id,listfunct);
+                        }
+                        else{
+                            showChildBlock(parentNode.model.id, id, title);
+                            showListFunct(id,listfunct);
+                            connectChildNode(parentNode.model.id, id);
+                        }
+                        
+                        if(node.children.length > 0)
+                            showPartTree(node.children, node);
+                    });
+                }
+                showPartTree(childrens,parentNode);
             }
             updatePath(root);
         }
