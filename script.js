@@ -299,7 +299,7 @@ function addChildNode(tree,root,idparent,id,title,children=[]){
     console.log("Входящие параметры",{tree,root,idparent,id,title});
 
     node = tree.parse({id,title,children,listfunct:[]});
-    nodeparent = getNode(root,id);
+    nodeparent = getNode(root,idparent);
 
     nodeparent.addChild(node);
     return true;
@@ -497,6 +497,7 @@ function setListnerOnTool(tree,root,all = true, node = null){
             if(!result){
                 
                 childrens.forEach(function(node){
+                    console.log("TEST",node);
                     addChildNode(tree, root, idParent, node.model.id, node.model.title, node.model.children);
                 });
       
