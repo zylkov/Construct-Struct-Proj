@@ -276,6 +276,29 @@ function showTree(tree){
     });
 }
 
+function showPartTree(childrens, parentNode){
+    childrens.forEach(function(node){
+        id = node.model.id;
+        title = node.model.title;
+        listfunct = node.model.listfunct;
+        path = parentNode.getPath(); 
+
+        console.log("Путь удаленного ",path);
+        if(path.length === 1){
+            addHTMLBlock($("#tree"),id,title);
+            showListFunct(id,listfunct);
+        }
+        else{
+            showChildBlock(parentNode.model.id, id, title);
+            showListFunct(id,listfunct);
+            connectChildNode(parentNode.model.id, id);
+        }
+        
+        if(node.children.length > 0)
+            showPartTree(node.children, node);
+    });
+}
+
 function updatePath(tree){
     
     tree.walk(function(node){
@@ -501,28 +524,7 @@ function setListnerOnTool(tree,root,all = true, node = null){
                     addChildNode(tree, root, idParent, node.model.id, node.model.title, node.model.children);
                 });
       
-                showPartTree = function(childrens, parentNode){
-                    childrens.forEach(function(node){
-                        id = node.model.id;
-                        title = node.model.title;
-                        listfunct = node.model.listfunct;
-                        path = parentNode.getPath(); 
-
-                        console.log("Путь удаленного ",path);
-                        if(path.length === 1){
-                            addHTMLBlock($("#tree"),id,title);
-                            showListFunct(id,listfunct);
-                        }
-                        else{
-                            showChildBlock(parentNode.model.id, id, title);
-                            showListFunct(id,listfunct);
-                            connectChildNode(parentNode.model.id, id);
-                        }
-                        
-                        if(node.children.length > 0)
-                            showPartTree(node.children, node);
-                    });
-                }
+                
                 showPartTree(childrens,parentNode);
             }
             updatePath(root);
