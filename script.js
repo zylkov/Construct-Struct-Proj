@@ -198,6 +198,10 @@ function showChildBlock(idparent,id,title){
     addHTMLBlock(parent,id,title);
 }
 
+function showChangeTitleBlock(id, title){
+    block = $(`#block${id} .parent .node .title .text`).first();
+    block.text(title);
+}
 
 function removeBlock (id){
     block = $(`#block${id}`);
@@ -285,29 +289,29 @@ function updatePath(tree){
     });
 }
 
+function getNode(root,id){
+    return root.first({strategy: 'post'}, function (node) {
+        return node.model.id === id;
+    });
+}
+
 function addChildNode(tree,root,idparent,id,title,children=[]){
     console.log("Входящие параметры",{tree,root,idparent,id,title});
 
     node = tree.parse({id,title,children,listfunct:[]});
-    nodeparent = root.first({strategy: 'post'}, function (node) {
-        return node.model.id === idparent;
-    });
+    nodeparent = getNode(root,id);
 
     nodeparent.addChild(node);
     return true;
 }
 
 function getChildrensNode(tree, root, id){
-    node = root.first({strategy: 'post'}, function (node) {
-        return node.model.id === id;
-    });
+    node = getNode(root,id);
     return node.children;
 }
 
 function getParentNode(tree, root, id){
-    node = root.first({strategy: 'post'}, function (node) {
-        return node.model.id === id;
-    });
+    node = getNode(root,id);
     return node.parent;
 }
 
@@ -441,7 +445,16 @@ function setListnerOnTool(tree,root,all = true, node = null){
         updatePath(root);
         
     });
-    
+    button(".btn-editchild").click(function(){
+        idNode = getIdNodeChild($(this));
+        result = prompt("Введите новое название блока:", "Нет названия");
+        node = getNode(root,idNode);
+        node.model.title = result;
+        showChangeTitleBlock(idNode,result);
+        console.log(root);
+
+    });
+
     button(".btn-remove").click(function(){
 
         result = confirm("Вы точно хотите удалить блок?");
