@@ -144,6 +144,16 @@ function removeConnectNode(idchild){
     path.remove();
 }
 
+function removeConnectChildNodes(tree, root, childrens){ 
+    childrens.forEach(function(node){
+        removeConnectNode(node.model.id);
+        nodeChildren = getChildrensNode(tree, root, node.model.id);
+
+        if(nodeChildren.length > 0)
+            removeConnectChildNodes(tree, root, nodeChildren);
+    });
+}
+
 function updateConnectChildNode(idparent, idchild){
     svg = $("#svg1");
     path=$(`#path${idchild}`);
@@ -176,6 +186,12 @@ function addHTMLBlock(el,id,title){
                     </button>
                     <button class="btn-editchild">
                     Редактировать
+                    </button>
+                    <button class="btn-move">
+                    Вырезать
+                    </button>
+                    <button class="btn-paste" style="display:none;">
+                    Вставить
                     </button>
                 </div>
             </div>
@@ -477,6 +493,42 @@ function setListnerOnTool(tree,root,all = true, node = null){
         console.log(root);
 
     });
+    button(".btn-move").click(function(){
+        idNode = getIdNodeChild($(this));
+        node = getNode(root,idNode);
+        children = node.children
+
+        
+
+        $(`#block${idNode} .node .title`).css("background-color","red");
+        buttonPaste = $(`.block .node`).not($(`#block${idNode} .node`)).find(".btn-paste");
+        buttonPaste.css("display","block");
+        updatePath(root);
+
+        buttonPaste.click(function(){
+            idContanire = getIdNodeChild($(this));
+            nodeContanire = getNode(root,idContanire);
+
+            removeConnectChildNodes(tree, root,[node]);
+            removeBlock(node.model.id);
+            removeNode(tree, root, idNode);
+
+            addChildNode(tree, root, idContanire, node.model.id, node.model.title, node.model.children);
+            console.log('root:',root);
+            nodeChild = getNode(root,node.model.id);
+            
+            showPartTree([nodeChild],nodeChild.parent);
+            updatePath(root);
+            
+            buttonPaste.off("click");
+
+
+        });
+
+        
+        
+
+    });
 
     button(".btn-remove").click(function(){
 
@@ -499,17 +551,8 @@ function setListnerOnTool(tree,root,all = true, node = null){
                     removeBlock(node.model.id);
                 });
                 // удаление линий у дочерних и их зависимых блоков 
-                removeConnectChildNodes = function(childrens){
-                    childrens.forEach(function(node){
-                        removeConnectNode(node.model.id);
-                        nodeChildren = getChildrensNode(tree, root, node.model.id);
 
-                        if(nodeChildren.length > 0)
-                            removeConnectChildNodes(nodeChildren);
-                    });
-                }
-
-                removeConnectChildNodes(childrens);
+                removeConnectChildNodes(tree, root, childrens);
             }
             removeConnectNode(idNode);
             removeBlock(idNode);
@@ -520,7 +563,7 @@ function setListnerOnTool(tree,root,all = true, node = null){
             if(!result){
                 
                 childrens.forEach(function(node){
-                    console.log("TEST",node);
+                    
                     addChildNode(tree, root, idParent, node.model.id, node.model.title, node.model.children);
                 });
       
