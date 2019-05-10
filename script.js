@@ -245,7 +245,7 @@ function addHTMLFunct(el,id,title){
                 <button class="btn btn-remove">
                  Удалить
                 </button>
-                <button class="btn">
+                <button class="btn btn-edit">
                  Редактировать
                 </button>
               </div>
@@ -273,6 +273,11 @@ function showBlockFunct(idblock, id, title){
 function removeBlockFunct(idblock, id){
     el = $(`#block${idblock} .parent .list-funct `).find(`#funct${id}`).first();
     el.remove();
+}
+
+function showChangeTitleBlockFunct(idblock, id, title){
+    block = $(`#block${idblock} .parent .list-funct `).find(`#funct${id} .title .text`).first();
+    block.text(title);
 }
 
 function showTree(tree){
@@ -522,6 +527,19 @@ function setListnerOnFunctionTool(tree,root,type = "all", node = null) {
         removeBlockFunct(idNode, idFunct);
         
     });
+    button(".btn-edit").click(function(){
+        idNode = getIdNodeChild($(this));
+        idFunct = getIdFunct($(this));
+
+        node = getNode(root, idNode); 
+        objIndex = node.model.listfunct.findIndex((obj => obj.id === idFunct));
+
+        result = prompt("Введите новое название функции:", "Нет названия");
+
+        node.model.listfunct[objIndex].title = result;
+
+        showChangeTitleBlockFunct(idNode, idFunct, result);
+    })
 }
 
 function setListnerOnNodeTool(tree,root,all = true, node = null){
