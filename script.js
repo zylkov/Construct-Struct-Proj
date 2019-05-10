@@ -239,13 +239,13 @@ function addHTMLFunct(el,id,title){
               </div>
 
               <div class="tool">
-                <button>
+                <button class="btn btn-info">
                  Информация
                 </button>
-                <button>
+                <button class="btn">
                  Удалить
                 </button>
-                <button>
+                <button class="btn">
                  Редактировать
                 </button>
               </div>
@@ -462,18 +462,47 @@ $(document).ready(function() {
     tree = new TreeModel();
     root = tree.parse(data);
 
-    showTree(root);
+    showTree(root);  
+    setAllListner(tree, root);  
+});
+
+function setAllListner(tree,root){
+    setListanerOnUpdListFunct = 
+    function(all = true, node = null){
+        listFunct = all ? $(".block .parent .list-funct") : node.find(".parent .list-funct");
+        listFunct.arrive(".funct", function(newFunctItem){
+            setListnerOnFunctionTool(tree, root, "funct", $(newFunctItem));
+        });
+    }
+
     setListnerOnNodeTool(tree,root);
+    setListnerOnFunctionTool(tree,root);
+    setListanerOnUpdListFunct();
 
     $("#tree").arrive(".block", function(newitem){
-        setListnerOnNodeTool(tree,root, false, $(newitem));
-        
+        setListnerOnNodeTool(tree, root, false, $(newitem));
+        setListnerOnFunctionTool(tree, root, "listfunct", $(newitem));
+        setListanerOnUpdListFunct(false, $(newitem));
     });
-    
 
+}
 
+function setListnerOnFunctionTool(tree,root,type = "all", node = null) {
 
-});
+    button = 
+    function(tag){
+       return (
+        type === "all" ? $(`.funct .tool ${tag}`) :
+        type === "listfunct" ? node.find(`.parent .list-funct .funct .tool ${tag}`).first() :
+        type === "funct" ? node.find(`.tool ${tag}`).first() :
+        console.warn(`type: ${type} not exist`) 
+        );
+    }
+
+    button(".btn-info").click(function(){
+        console.log("Нажата функция");
+    });
+}
 
 function setListnerOnNodeTool(tree,root,all = true, node = null){
 
