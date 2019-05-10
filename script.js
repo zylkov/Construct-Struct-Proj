@@ -299,7 +299,7 @@ function showPartTree(childrens, parentNode){
         listfunct = node.model.listfunct;
         path = parentNode.getPath(); 
 
-        console.log("Путь удаленного ",path);
+        
         if(path.length === 1){
             addHTMLBlock($("#tree"),id,title);
             showListFunct(id,listfunct);
@@ -334,10 +334,10 @@ function getNode(root,id){
     });
 }
 
-function addChildNode(tree,root,idparent,id,title,children=[]){
-    console.log("Входящие параметры",{tree,root,idparent,id,title});
+function addChildNode(tree,root,idparent,id,title,children=[],listfunct=[]){
+    
 
-    node = tree.parse({id,title,children,listfunct:[]});
+    node = tree.parse({id,title,children,listfunct});
     nodeparent = getNode(root,idparent);
 
     nodeparent.addChild(node);
@@ -488,7 +488,7 @@ function setListnerOnTool(tree,root,all = true, node = null){
         node = getNode(root,idNode);
         node.model.title = result;
         showChangeTitleBlock(idNode,result);
-        console.log(root);
+        
 
     });
     button(".btn-move").click(function(){
@@ -516,9 +516,8 @@ function setListnerOnTool(tree,root,all = true, node = null){
             removeConnectChildNodes(tree, root,[node]);
             removeBlock(node.model.id);
             removeNode(tree, root, idNode);
-
-            addChildNode(tree, root, idContanire, node.model.id, node.model.title, node.model.children);
-            console.log('root:',root);
+            addChildNode(tree, root, idContanire, node.model.id, node.model.title, node.model.children, node.model.listfunct);
+            
             nodeChild = getNode(root,node.model.id);
             
             showPartTree([nodeChild],nodeChild.parent);
@@ -539,7 +538,7 @@ function setListnerOnTool(tree,root,all = true, node = null){
             idNode = getIdNodeChild($(this));
             result = true;
 
-            console.log("Удаление ДО: ",root);
+           
 
             childrens = getChildrensNode(tree, root, idNode);
             parentNode = getParentNode(tree, root, idNode)
