@@ -181,6 +181,9 @@ function addHTMLBlock(el,id,title){
                     <button class="btn btn-addchild">
                     Добавить
                     </button>
+                    <button class="btn btn-addfunct">
+                    Добавить Функцию
+                    </button>
                     <button class="btn btn-remove">
                     Удалить
                     </button>
@@ -259,6 +262,17 @@ function showListFunct (idel, listfuncts){
         
         addHTMLFunct(el, element.id, element.title);
     });
+}
+
+function showBlockFunct(idblock, id, title){
+    el = $(`#block${idblock} .parent .list-funct `).first();
+    addHTMLFunct(el, id, title);
+
+}
+
+function removeBlockFunct(idblock, id){
+    el = $(`#block${idblock} .parent .list-funct `).find(`#funct${id}`).first();
+    el.remove();
 }
 
 function showTree(tree){
@@ -449,10 +463,10 @@ $(document).ready(function() {
     root = tree.parse(data);
 
     showTree(root);
-    setListnerOnTool(tree,root);
+    setListnerOnNodeTool(tree,root);
 
     $("#tree").arrive(".block", function(newitem){
-        setListnerOnTool(tree,root, false, $(newitem));
+        setListnerOnNodeTool(tree,root, false, $(newitem));
         
     });
     
@@ -461,7 +475,7 @@ $(document).ready(function() {
 
 });
 
-function setListnerOnTool(tree,root,all = true, node = null){
+function setListnerOnNodeTool(tree,root,all = true, node = null){
 
     button = 
     function(tag){
@@ -481,6 +495,14 @@ function setListnerOnTool(tree,root,all = true, node = null){
         connectChildNode(idNode,newdata.id);
         updatePath(root);
         
+    });
+    button(".btn-addfunct").click(function(){
+        idNode = getIdNodeChild($(this));
+        result = prompt("Введите название функции:", "Нет названия");
+        node = getNode(root,idNode);
+        newFunct = {id:getRandomInt(10,100), title:result};
+        node.model.listfunct.push(newFunct);
+        showBlockFunct(idNode,newFunct.id,newFunct.title);
     });
     button(".btn-editchild").click(function(){
         idNode = getIdNodeChild($(this));
