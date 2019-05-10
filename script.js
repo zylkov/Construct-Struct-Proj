@@ -452,7 +452,6 @@ $(document).ready(function() {
     setListnerOnTool(tree,root);
 
     $("#tree").arrive(".block", function(newitem){
-        
         setListnerOnTool(tree,root, false, $(newitem));
         
     });
@@ -466,11 +465,10 @@ function setListnerOnTool(tree,root,all = true, node = null){
 
     button = 
     function(tag){
-       return all ? $(tag) : node.find(tag);
+       return all ? $(tag) : node.find(`.parent .node .tool ${tag}`).first();
     }
 
-    
-
+ 
     button(".btn-addchild").click(function(){
         
         idNode = getIdNodeChild($(this));
