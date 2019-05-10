@@ -175,22 +175,22 @@ function addHTMLBlock(el,id,title){
                     </div>
                 </div>
                 <div class="tool">
-                    <button>
+                    <button class="btn">
                     Информация
                     </button>
-                    <button class="btn-addchild">
+                    <button class="btn btn-addchild">
                     Добавить
                     </button>
-                    <button class="btn-remove">
+                    <button class="btn btn-remove">
                     Удалить
                     </button>
-                    <button class="btn-editchild">
+                    <button class="btn btn-editchild">
                     Редактировать
                     </button>
-                    <button class="btn-move">
+                    <button class="btn btn-move">
                     Вырезать
                     </button>
-                    <button class="btn-paste" style="display:none;">
+                    <button class="btn btn-paste" style="display:none;">
                     Вставить
                     </button>
                 </div>
@@ -499,8 +499,14 @@ function setListnerOnTool(tree,root,all = true, node = null){
         
 
         $(`#block${idNode} .node .title`).css("background-color","red");
+
+        allButton = $('.block .parent .node .tool .btn')
+        allButton.prop("disabled",true);
+
         buttonPaste = $(`.block .node`).not($(`#block${idNode} .node`)).find(".btn-paste");
+        buttonPaste.prop("disabled",false);
         buttonPaste.css("display","block");
+
         updatePath(root);
 
         buttonPaste.click(function(){
@@ -516,15 +522,12 @@ function setListnerOnTool(tree,root,all = true, node = null){
             nodeChild = getNode(root,node.model.id);
             
             showPartTree([nodeChild],nodeChild.parent);
-            updatePath(root);
             
             buttonPaste.off("click");
-
-
-        });
-
-        
-        
+            buttonPaste.css("display","none");
+            allButton.prop("disabled",false);
+            updatePath(root);
+        });   
 
     });
 
