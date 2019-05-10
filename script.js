@@ -242,7 +242,7 @@ function addHTMLFunct(el,id,title){
                 <button class="btn btn-info">
                  Информация
                 </button>
-                <button class="btn">
+                <button class="btn btn-remove">
                  Удалить
                 </button>
                 <button class="btn">
@@ -499,8 +499,28 @@ function setListnerOnFunctionTool(tree,root,type = "all", node = null) {
         );
     }
 
+    getIdFunct=
+    function(jqButtonFunct){
+        parent = jqButtonFunct.parents(".funct").eq(0);
+        idparent = parent.attr("id");
+        id = parseInt(idparent.replace("funct",""));
+        return id
+    }
+
     button(".btn-info").click(function(){
-        console.log("Нажата функция");
+        idFunct = getIdFunct($(this));
+        idNode = getIdNodeChild($(this));
+        console.log("Нажата функция под id: ",idFunct);
+        console.log("Родитель id:", idNode);
+    });
+    button(".btn-remove").click(function(){
+        idNode = getIdNodeChild($(this));
+        idFunct = getIdFunct($(this));
+
+        node = getNode(root, idNode);
+        node.model.listfunct = node.model.listfunct.filter(funct => funct.id !== idFunct);
+        removeBlockFunct(idNode, idFunct);
+        
     });
 }
 
@@ -631,7 +651,6 @@ function getIdNodeChild(jqblockchild){
     idparent = parent.attr("id");
     id = parseInt(idparent.replace("block",""));
     return id
-
 }
 
 
