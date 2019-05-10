@@ -479,7 +479,7 @@ function setListnerOnNodeTool(tree,root,all = true, node = null){
 
     button = 
     function(tag){
-       return all ? $(tag) : node.find(`.parent .node .tool ${tag}`).first();
+       return all ? $(`.block .parent .node .tool ${tag}`) : node.find(`.parent .node .tool ${tag}`).first();
     }
 
  
