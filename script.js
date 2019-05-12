@@ -175,26 +175,28 @@ function addHTMLBlock(el,id,title){
                     </div>
                 </div>
                 <div class="tool">
-                    <button class="MyBtn">
+                    <button class="MyBtn MyBtn-info btn btn-outline-info btn-sm" data-toggle="modal" data-target="#nodeInfoModal">
                     Информация
                     </button>
-                    <button class="MyBtn MyBtn-addchild">
+                    <button class="MyBtn MyBtn-addchild btn btn-outline-success btn-sm">
                     Добавить
                     </button>
-                    <button class="MyBtn MyBtn-addfunct">
+                    <button class="MyBtn MyBtn-addfunct btn btn-outline-success btn-sm">
                     Добавить Функцию
                     </button>
-                    <button class="MyBtn MyBtn-remove">
-                    Удалить
-                    </button>
-                    <button class="MyBtn MyBtn-editchild">
+                    
+                    <button class="MyBtn MyBtn-editchild btn btn-outline-warning btn-sm">
                     Редактировать
                     </button>
-                    <button class="MyBtn MyBtn-move">
+                    <button class="MyBtn MyBtn-move btn btn-outline-warning btn-sm">
                     Вырезать
                     </button>
-                    <button class="MyBtn MyBtn-paste" style="display:none;">
+                    <button class="MyBtn MyBtn-paste btn btn-primary btn-sm" style="display:none;">
                     Вставить
+                    </button>
+
+                    <button class="MyBtn MyBtn-remove btn btn-outline-danger btn-sm">
+                    Удалить
                     </button>
                 </div>
             </div>
@@ -239,14 +241,16 @@ function addHTMLFunct(el,id,title){
               </div>
 
               <div class="tool">
-                <button class="MyBtn MyBtn-info">
+                <button class="MyBtn MyBtn-info btn btn-outline-info btn-sm" data-toggle="modal" data-target="#functionInfoModal" >
                  Информация
                 </button>
-                <button class="MyBtn MyBtn-remove">
-                 Удалить
-                </button>
-                <button class="MyBtn MyBtn-edit">
+                
+                <button class="MyBtn MyBtn-edit btn btn-outline-warning btn-sm">
                  Редактировать
+                </button>
+
+                <button class="MyBtn MyBtn-remove btn btn-outline-danger btn-sm">
+                 Удалить
                 </button>
               </div>
 
@@ -395,6 +399,40 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min)) + min;
  }
 
+function getInfoFunctBlock(id){
+    return new Promise((resolve, reject) => {
+
+        setTimeout(() => {
+        let info = {id,title:"Фун Блок",discription:"Описание блока"}
+        resolve(info);
+        }, 1000);
+    
+    });
+}
+
+function getInfoFunct(id){
+    return new Promise((resolve, reject) => {
+
+        setTimeout(() => {
+        let info = {id,title:"Фун Блок",discription:"Описание блока"}
+        resolve(info);
+        }, 1000);
+    
+    });
+}
+
+
+function turnLoadingOnModal(modal, on){
+    if(on){
+        modal.find(".loading").removeClass("d-none").addClass("d-flex");
+        modal.find(".loaded").addClass("d-none");
+    }
+    else{
+        modal.find(".loading").removeClass("d-flex").addClass("d-none");
+        modal.find(".loaded").removeClass("d-none");
+    }
+}
+  
 
 $(document).ready(function() {
     // reset svg each time 
@@ -468,7 +506,14 @@ $(document).ready(function() {
     root = tree.parse(data);
 
     showTree(root);  
-    setAllListner(tree, root);  
+    setAllListner(tree, root);
+    
+    $('#nodeInfoModal').on('hidden.bs.modal', function (e) {
+        turnLoadingOnModal($(this),true);
+    });
+    $('#functionInfoModal').on('hidden.bs.modal', function (e) {
+        turnLoadingOnModal($(this),true);
+    });
 });
 
 function setAllListner(tree,root){
@@ -549,6 +594,24 @@ function setListnerOnNodeTool(tree,root,all = true, node = null){
        return all ? $(`.block .parent .node .tool ${tag}`) : node.find(`.parent .node .tool ${tag}`).first();
     }
 
+    button(".MyBtn-info").click(function(){
+        idNode = getIdNodeChild($(this));
+        console.log("Был нажат блок под id",idNode);
+        node = getNode(root, idNode);
+        $("#nodeInfoModalTitle").text(node.model.title);
+        getInfoFunctBlock(idNode).then(
+            (result) => {
+               let modal = $("#nodeInfoModal");
+               turnLoadingOnModal(modal, false);
+               modal.find("#discriptionFormControlTextarea").val(result.discription);
+            },
+
+            (msgerror) => {
+
+            }
+        )
+
+    });
  
     button(".MyBtn-addchild").click(function(){
         
