@@ -175,25 +175,25 @@ function addHTMLBlock(el,id,title){
                     </div>
                 </div>
                 <div class="tool">
-                    <button class="btn">
+                    <button class="MyBtn">
                     Информация
                     </button>
-                    <button class="btn btn-addchild">
+                    <button class="MyBtn MyBtn-addchild">
                     Добавить
                     </button>
-                    <button class="btn btn-addfunct">
+                    <button class="MyBtn MyBtn-addfunct">
                     Добавить Функцию
                     </button>
-                    <button class="btn btn-remove">
+                    <button class="MyBtn MyBtn-remove">
                     Удалить
                     </button>
-                    <button class="btn btn-editchild">
+                    <button class="MyBtn MyBtn-editchild">
                     Редактировать
                     </button>
-                    <button class="btn btn-move">
+                    <button class="MyBtn MyBtn-move">
                     Вырезать
                     </button>
-                    <button class="btn btn-paste" style="display:none;">
+                    <button class="MyBtn MyBtn-paste" style="display:none;">
                     Вставить
                     </button>
                 </div>
@@ -239,13 +239,13 @@ function addHTMLFunct(el,id,title){
               </div>
 
               <div class="tool">
-                <button class="btn btn-info">
+                <button class="MyBtn MyBtn-info">
                  Информация
                 </button>
-                <button class="btn btn-remove">
+                <button class="MyBtn MyBtn-remove">
                  Удалить
                 </button>
-                <button class="btn btn-edit">
+                <button class="MyBtn MyBtn-edit">
                  Редактировать
                 </button>
               </div>
@@ -512,13 +512,13 @@ function setListnerOnFunctionTool(tree,root,type = "all", node = null) {
         return id
     }
 
-    button(".btn-info").click(function(){
+    button(".MyBtn-info").click(function(){
         idFunct = getIdFunct($(this));
         idNode = getIdNodeChild($(this));
         console.log("Нажата функция под id: ",idFunct);
         console.log("Родитель id:", idNode);
     });
-    button(".btn-remove").click(function(){
+    button(".MyBtn-remove").click(function(){
         idNode = getIdNodeChild($(this));
         idFunct = getIdFunct($(this));
 
@@ -527,7 +527,7 @@ function setListnerOnFunctionTool(tree,root,type = "all", node = null) {
         removeBlockFunct(idNode, idFunct);
         
     });
-    button(".btn-edit").click(function(){
+    button(".MyBtn-edit").click(function(){
         idNode = getIdNodeChild($(this));
         idFunct = getIdFunct($(this));
 
@@ -550,7 +550,7 @@ function setListnerOnNodeTool(tree,root,all = true, node = null){
     }
 
  
-    button(".btn-addchild").click(function(){
+    button(".MyBtn-addchild").click(function(){
         
         idNode = getIdNodeChild($(this));
         result = prompt("Введите название блока:", "Нет названия");
@@ -563,7 +563,7 @@ function setListnerOnNodeTool(tree,root,all = true, node = null){
         updatePath(root);
         
     });
-    button(".btn-addfunct").click(function(){
+    button(".MyBtn-addfunct").click(function(){
         idNode = getIdNodeChild($(this));
         result = prompt("Введите название функции:", "Нет названия");
         node = getNode(root,idNode);
@@ -571,7 +571,7 @@ function setListnerOnNodeTool(tree,root,all = true, node = null){
         node.model.listfunct.push(newFunct);
         showBlockFunct(idNode,newFunct.id,newFunct.title);
     });
-    button(".btn-editchild").click(function(){
+    button(".MyBtn-editchild").click(function(){
         idNode = getIdNodeChild($(this));
         result = prompt("Введите новое название блока:", "Нет названия");
         node = getNode(root,idNode);
@@ -580,7 +580,7 @@ function setListnerOnNodeTool(tree,root,all = true, node = null){
         
 
     });
-    button(".btn-move").click(function(){
+    button(".MyBtn-move").click(function(){
         idNode = getIdNodeChild($(this));
         node = getNode(root,idNode);
         children = node.children
@@ -589,10 +589,10 @@ function setListnerOnNodeTool(tree,root,all = true, node = null){
 
         $(`#block${idNode} .node .title`).css("background-color","red");
 
-        allButton = $('.block .parent .node .tool .btn')
+        allButton = $('.block .parent .node .tool .MyBtn')
         allButton.prop("disabled",true);
 
-        buttonPaste = $(`.block .node`).not($(`#block${idNode} .node`)).find(".btn-paste");
+        buttonPaste = $(`.block .node`).not($(`#block${idNode} .node`)).find(".MyBtn-paste");
         buttonPaste.prop("disabled",false);
         buttonPaste.css("display","block");
 
@@ -619,7 +619,7 @@ function setListnerOnNodeTool(tree,root,all = true, node = null){
 
     });
 
-    button(".btn-remove").click(function(){
+    button(".MyBtn-remove").click(function(){
 
         result = confirm("Вы точно хотите удалить блок?");
 
