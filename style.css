@@ -6,24 +6,36 @@ ul,ol,li,h1,h2,h3,h4,h5,h6,pre,form,body,html,p,blockquote,fieldset,input
 a img,:link img,:visited img { border:none }
 address { font-style:normal }
 
+body{
+  
+  display: flex;
+  justify-content: flex-start;
+
+}
 
 
+#displayContainer{
+  width: 100%;
+  height: 100vh;
+  background-image: url("rs/sq-background.png");
+  overflow: scroll;
+}
+#drawContainer{
+  position: relative;
+}
 #svgContainer {
 	z-index: 1;
 	position: absolute;
 	opacity: 0.5;
 }
-
-.tree{
-  z-index: 0;
-  background-color: #ffffff;
-  background-image: url("rs/sq-background.png");
-  overflow: scroll;
+#tree{
+  width: auto;
+  height: 100%;
 
 }
 
 .node .title {
-  z-index: 3;
+
   width: 100px;
   height: 100px;
   background-color: #FFF2CC;
@@ -53,6 +65,7 @@ address { font-style:normal }
 }
 
 .node {
+  z-index: 3;
   display: inline-flex;
   float: left;
   margin-right: 20px;
