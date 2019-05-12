@@ -274,13 +274,18 @@ function showBlockFunct(idblock, id, title){
 
 }
 
+function getBlockFunct(idblock, id){
+    return $(`#block${idblock} .parent .list-funct `).find(`#funct${id}`).first();
+}
+
 function removeBlockFunct(idblock, id){
-    el = $(`#block${idblock} .parent .list-funct `).find(`#funct${id}`).first();
+    el = getBlockFunct(idblock, id);
     el.remove();
 }
 
 function showChangeTitleBlockFunct(idblock, id, title){
-    block = $(`#block${idblock} .parent .list-funct `).find(`#funct${id} .title .text`).first();
+    block = getBlockFunct(idblock, id)
+    block.find(".title .text");
     block.text(title);
 }
 
@@ -410,16 +415,17 @@ function getInfoFunctBlock(id){
     });
 }
 
-function getInfoFunct(id){
+function getInfoFunct(idParent, id){
     return new Promise((resolve, reject) => {
 
         setTimeout(() => {
-        let info = {id,title:"Фун Блок",discription:"Описание блока"}
+        let info = {idParent, id, title:"Функция", discription:"Описание функции", type:"struct"}
         resolve(info);
         }, 1000);
     
     });
 }
+
 
 
 function turnLoadingOnModal(modal, on){
@@ -514,6 +520,14 @@ $(document).ready(function() {
     $('#functionInfoModal').on('hidden.bs.modal', function (e) {
         turnLoadingOnModal($(this),true);
     });
+
+    $("#functionInfoModal #typeFunctionFormControlSelect").change(function(){
+        value = $(this).val();
+        if(value === "single" || value === "discription")
+            $("#functionInfoModal #functionInfoModalStruct").addClass("d-none")
+        else
+            $("#functionInfoModal #functionInfoModalStruct").removeClass("d-none");
+    });
 });
 
 function setAllListner(tree,root){
@@ -562,6 +576,28 @@ function setListnerOnFunctionTool(tree,root,type = "all", node = null) {
         idNode = getIdNodeChild($(this));
         console.log("Нажата функция под id: ",idFunct);
         console.log("Родитель id:", idNode);
+
+        node = getNode(root, idNode);
+        objIndex = node.model.listfunct.findIndex((obj => obj.id === idFunct));
+
+        $("#functionInfoModalTitle").text(node.model.listfunct[objIndex].title);
+        getInfoFunct(idNode, idFunct).then(
+            (result) => {
+               let modal = $("#functionInfoModal");
+               turnLoadingOnModal(modal, false);
+               modal.find("#discriptionFormControlTextarea").val(result.discription);
+               modal.find("#typeFunctionFormControlSelect").val(result.type);
+        
+               if(result.type === "single" || result.type === "discription")
+                    $("#functionInfoModal #functionInfoModalStruct").addClass("d-none")
+               else
+                    $("#functionInfoModal #functionInfoModalStruct").removeClass("d-none");
+            },
+
+            (msgerror) => {
+
+            }
+        )
     });
     button(".MyBtn-remove").click(function(){
         idNode = getIdNodeChild($(this));
