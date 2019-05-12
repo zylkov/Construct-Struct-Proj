@@ -6,17 +6,31 @@ ul,ol,li,h1,h2,h3,h4,h5,h6,pre,form,body,html,p,blockquote,fieldset,input
 a img,:link img,:visited img { border:none }
 address { font-style:normal }
 
+
+
 #svgContainer {
-	z-index: -10;
+	z-index: 1;
 	position: absolute;
 	opacity: 0.5;
 }
 
+.tree{
+  z-index: 0;
+  background-color: #ffffff;
+  background-image: url("rs/sq-background.png");
+  overflow: scroll;
+
+}
+
 .node .title {
+  z-index: 3;
   width: 100px;
   height: 100px;
-  background-color: green;
+  background-color: #FFF2CC;
   border-radius: 50%;
+  border-color: #D6B656;
+  border-style: solid;
+  border-width: 2px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -42,23 +56,29 @@ address { font-style:normal }
   display: inline-flex;
   float: left;
   margin-right: 20px;
-  background-color: rgba(116, 186, 2, 0.5);;
 }
 
 .list-funct {
-  height: 100px;
+  display: flex;
+  justify-content: flex-start;
+  height: 150px;
+  width: 100%;
 }
 
 .parent {
   width: 100%;
-  display: inline-block;
+  display: flex;
+  justify-content: flex-start;
 }
 
 .funct .title {
   width: 100px;
   height: 100px;
-  background-color: green;
+  background-color: #D5E8D4;
   border-radius: 15%;
+  border-color: #82B366;
+  border-style: solid;
+  border-width: 2px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -67,7 +87,6 @@ address { font-style:normal }
 .funct {
   display: inline-flex;
   margin-right: 10px;
-  background-color: pink;
 }
 
 .childrens {
