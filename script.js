@@ -284,8 +284,8 @@ function removeBlockFunct(idblock, id){
 }
 
 function showChangeTitleBlockFunct(idblock, id, title){
-    block = getBlockFunct(idblock, id)
-    block.find(".title .text");
+    block = getBlockFunct(idblock, id);
+    block =  block.find(".title .text");
     block.text(title);
 }
 
