@@ -428,15 +428,33 @@ function getInfoFunct(idParent, id){
 
 
 
-function turnLoadingOnModal(modal, on){
+function turnLoadingOnModal(modals, on){
     if(on){
-        modal.find(".loading").removeClass("d-none").addClass("d-flex");
-        modal.find(".loaded").addClass("d-none");
+        modals.find(".loading").removeClass("d-none").addClass("d-flex");
+        modals.find(".loaded").addClass("d-none");
     }
     else{
-        modal.find(".loading").removeClass("d-flex").addClass("d-none");
-        modal.find(".loaded").removeClass("d-none");
+        modals.find(".loading").removeClass("d-flex").addClass("d-none");
+        modals.find(".loaded").removeClass("d-none");
     }
+}
+
+function promptModal(title = "Заголовок", question = "Вопрос?" , defualtAnswer = "", callbackAnswered = ()=>{}){
+    modals = $("#proptModal");
+    modals.find("#proptModalTitle").text(title);
+    modals.find("#questionText").text(question);
+    answerInput = modals.find("#answerInput");
+    answerInput.val(defualtAnswer);
+
+    button = modals.find("#answerOnQuestion");
+    button.click(()=>{
+        callbackAnswered(answerInput.val());
+        modals.modal('hide');
+        button.off("click");
+    });
+
+    modals.modal("show");
+
 }
   
 
@@ -583,10 +601,10 @@ function setListnerOnFunctionTool(tree,root,type = "all", node = null) {
         $("#functionInfoModalTitle").text(node.model.listfunct[objIndex].title);
         getInfoFunct(idNode, idFunct).then(
             (result) => {
-               let modal = $("#functionInfoModal");
-               turnLoadingOnModal(modal, false);
-               modal.find("#discriptionFormControlTextarea").val(result.discription);
-               modal.find("#typeFunctionFormControlSelect").val(result.type);
+               let modals = $("#functionInfoModal");
+               turnLoadingOnModal(modals, false);
+               modals.find("#discriptionFormControlTextarea").val(result.discription);
+               modals.find("#typeFunctionFormControlSelect").val(result.type);
         
                if(result.type === "single" || result.type === "discription")
                     $("#functionInfoModal #functionInfoModalStruct").addClass("d-none")
@@ -615,11 +633,13 @@ function setListnerOnFunctionTool(tree,root,type = "all", node = null) {
         node = getNode(root, idNode); 
         objIndex = node.model.listfunct.findIndex((obj => obj.id === idFunct));
 
-        result = prompt("Введите новое название функции:", "Нет названия");
+        let changeTitle = (result) => {
+            console.log("Изменено");
+            node.model.listfunct[objIndex].title = result;
+            showChangeTitleBlockFunct(idNode, idFunct, result);
+        };
 
-        node.model.listfunct[objIndex].title = result;
-
-        showChangeTitleBlockFunct(idNode, idFunct, result);
+        promptModal("Новое название функции", "Введите новое название функции", node.model.listfunct[objIndex].title, changeTitle);
     })
 }
 
@@ -637,9 +657,9 @@ function setListnerOnNodeTool(tree,root,all = true, node = null){
         $("#nodeInfoModalTitle").text(node.model.title);
         getInfoFunctBlock(idNode).then(
             (result) => {
-               let modal = $("#nodeInfoModal");
-               turnLoadingOnModal(modal, false);
-               modal.find("#discriptionFormControlTextarea").val(result.discription);
+               let modals = $("#nodeInfoModal");
+               turnLoadingOnModal(modals, false);
+               modals.find("#discriptionFormControlTextarea").val(result.discription);
             },
 
             (msgerror) => {
@@ -652,30 +672,46 @@ function setListnerOnNodeTool(tree,root,all = true, node = null){
     button(".MyBtn-addchild").click(function(){
         
         idNode = getIdNodeChild($(this));
-        result = prompt("Введите название блока:", "Нет названия");
-    
-        newdata = {id:getRandomInt(10,100),title:result};
+        nodeParent = getNode(root, idNode);
         
-        addChildNode(tree,root,idNode,newdata.id,newdata.title);
-        showChildBlock(idNode,newdata.id,newdata.title);
-        connectChildNode(idNode,newdata.id);
-        updatePath(root);
+        let callbackAddChild = (result) => {
+            newdata = {id:getRandomInt(10,100),title:result};
+            
+            addChildNode(tree,root,idNode,newdata.id,newdata.title);
+            showChildBlock(idNode,newdata.id,newdata.title);
+            connectChildNode(idNode,newdata.id);
+            updatePath(root);
+        };
         
+        promptModal("Создание нового функционального блока",
+        `Введите название нового функционального блока зависимового от блока "${nodeParent.model.title}" `,
+        "Новый блок", callbackAddChild);
     });
     button(".MyBtn-addfunct").click(function(){
         idNode = getIdNodeChild($(this));
-        result = prompt("Введите название функции:", "Нет названия");
         node = getNode(root,idNode);
-        newFunct = {id:getRandomInt(10,100), title:result};
-        node.model.listfunct.push(newFunct);
-        showBlockFunct(idNode,newFunct.id,newFunct.title);
+
+        let callbackAddFunct = (result) => {
+            newFunct = {id:getRandomInt(10,100), title:result};
+            node.model.listfunct.push(newFunct);
+            showBlockFunct(idNode,newFunct.id,newFunct.title);
+        }
+
+        promptModal("Создание нового функции",
+        `Введите название новой функции функционального блока "${node.model.title}" `,
+        "Новая функция", callbackAddFunct);
+
     });
     button(".MyBtn-editchild").click(function(){
         idNode = getIdNodeChild($(this));
-        result = prompt("Введите новое название блока:", "Нет названия");
         node = getNode(root,idNode);
-        node.model.title = result;
-        showChangeTitleBlock(idNode,result);
+
+        let callbackEditChild = (result) => {
+            node.model.title = result;
+            showChangeTitleBlock(idNode,result);
+        }
+
+        promptModal("Новое название функционального блока", "Введите новое название функционального блока", node.model.title, callbackEditChild);
         
 
     });
