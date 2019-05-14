@@ -400,9 +400,6 @@ var ID = function () {
     return '_' + Math.random().toString(36).substr(2, 9);
   };
 
-function getRandomInt(min, max) {
-    return Math.floor(Math.random() * (max - min)) + min;
- }
 
 function getInfoFunctBlock(id){
     return new Promise((resolve, reject) => {
@@ -725,47 +722,57 @@ function setListnerOnNodeTool(tree,root,all = true, node = null){
     });
 
     button(".MyBtn-remove").click(function(){
+        idNode = getIdNodeChild($(this));
+        removedNode = getNode(root, idNode); 
+        childrens = getChildrensNode(tree, root, idNode);
+        parentNode = getParentNode(tree, root, idNode)
+        idParent = parentNode.model.id;
 
-        result = confirm("Вы точно хотите удалить блок?");
-
-        if(result){
-            idNode = getIdNodeChild($(this));
-            result = true;
-
-           
-
-            childrens = getChildrensNode(tree, root, idNode);
-            parentNode = getParentNode(tree, root, idNode)
-            idParent = parentNode.model.id;
-            // если дети есть
-            if(childrens.length > 0){
-                result = confirm("Вы хотите удалить дочерние объекты блока ?");
-
-                childrens.forEach(function(node){
-                    removeBlock(node.model.id);
-                });
-                // удаление линий у дочерних и их зависимых блоков 
-
-                removeConnectChildNodes(tree, root, childrens);
-            }
-            removeConnectNode(idNode);
-            removeBlock(idNode);
-
-            removeNode(tree, root, idNode);
-
-            // Добавления дочерних объектов на место удаленного родителя
-            if(!result){
-                
-                childrens.forEach(function(node){
+        let callRemoveFunctBlock = (result)=>{
+            if(result){
+                result = false;
+                // если дети есть
+                if(childrens.length > 0){
+                    result = true;
                     
-                    addChildNode(tree, root, idParent, node.model.id, node.model.title, node.model.children);
-                });
-      
+                    childrens.forEach(function(node){
+                        removeBlock(node.model.id);
+                    });
+                    // удаление линий у дочерних и их зависимых блоков 
+    
+                    removeConnectChildNodes(tree, root, childrens);
+                }
+                removeConnectNode(idNode);
+                removeBlock(idNode);
+    
+                removeNode(tree, root, idNode);
+    
+                // Добавления дочерних объектов на место удаленного родителя
+                updatePath(root);
+                return result;
                 
-                showPartTree(childrens,parentNode);
             }
-            updatePath(root);
+            return result;
         }
+
+
+        let callRemoveChildFunctBlock = (on) => {
+            if(on){
+                childrens.forEach(function(node){
+                            
+                    addChildNode(tree, root, idParent, node.model.id, node.model.title, node.model.children);
+                });            
+                showPartTree(childrens,parentNode);
+                updatePath(root);
+            }
+
+        }
+        
+        confirmModal("Удаление функционального блока",`Вы точно хотите удалить функциональный блок ${removedNode.model.title}`,callRemoveFunctBlock).then((result)=>{
+            if(result)
+                confirmModal("Удаление функционального блока",`Вы хотите оставить дочерние объекты функционального блока?`,callRemoveChildFunctBlock);
+        });
+        
     });
 }
 
