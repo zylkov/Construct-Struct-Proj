@@ -65,13 +65,13 @@ function confirmModal(title = "Заголовок", question = "Вопрос?" ,
         $("#modalContainer").append(htmlModal);
 
         modals = $(`#confirmModal${id}`);
-        console.log("Я раб");
+        
         modals.find(`#confirmModalTitle${id}`).text(title);
         modals.find(".questionTextConfirm").text(question);
 
         answerYes = modals.find(".answerYes");
         answerNo = modals.find(".answerNo");
-        console.log(answerNo);
+        
         answerYes.click(()=>{
             returnData = callbackAnswered(true);
             answerYes.off("click");
