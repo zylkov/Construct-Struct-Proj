@@ -587,10 +587,16 @@ function setListnerOnFunctionTool(tree,root,type = "all", node = null) {
     button(".MyBtn-remove").click(function(){
         idNode = getIdNodeChild($(this));
         idFunct = getIdFunct($(this));
-
         node = getNode(root, idNode);
-        node.model.listfunct = node.model.listfunct.filter(funct => funct.id !== idFunct);
-        removeBlockFunct(idNode, idFunct);
+        let callRemoveFunct = (result) =>{
+            if(result){
+                node.model.listfunct = node.model.listfunct.filter(funct => funct.id !== idFunct);
+                removeBlockFunct(idNode, idFunct);
+            }
+        }
+
+        confirmModal("Удаление функции",`Вы точно хотите удалить функцию `,callRemoveFunct);
+        
         
     });
     button(".MyBtn-edit").click(function(){
