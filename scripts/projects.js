@@ -18,7 +18,6 @@ function addHtmlProject(dataProjects, id, title, discription){
         
         let callbackRemoveProj = (result) =>
         {
-            console.log("Kuk");
             if(result){
                 removeProject(dataProjects, id);
                 removeHtmlProject(id);
