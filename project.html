@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <!-- Matirela Disgn Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <!-- My CSS -->
+    <link rel="stylesheet" href="styles/standarts.css">
+    <link rel="stylesheet" href="styles/project.css">
+    <title>tree</title>
+    </head>
+
+    <body>
+        <nav class="navbar navbar-light fixed-top bg-primary">
+            <a class="navbar-brand text-white">Проект</a>
+            
+            <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                <label class="btn btn-outline-light active">
+                  <input type="radio" name="tab-buttons" id="disciption-tab" autocomplete="off" data-toggle="tab" aria-controls="pills-disciption" aria-selected="true" checked> Описание
+                </label>
+                <label class="btn btn-outline-light">
+                  <input type="radio" name="tab-buttons" id="subprojects-tab" autocomplete="off" data-toggle="tab" aria-controls="pills-subprojects" aria-selected="false" > Подпроекты
+                </label>
+                <label class="btn btn-outline-light">
+                  <input type="radio" name="tab-buttons" id="setting-tab" autocomplete="off" data-toggle="tab" aria-controls="pills-setting" aria-selected="false" > Настройки
+                </label>
+            </div>
+  
+            <div class="form-inline " id="button-nav">
+                    <a class="btn btn-outline-primary mybtn-add" >
+                        <i class="material-icons">
+                            add
+                        </i>
+                    </a>
+                    <a class="btn btn-outline-primary" >
+                        <i class="material-icons">
+                            account_circle
+                        </i>
+                    </a>
+            </div>
+          </nav>
+          
+        <main role="main" class="container">
+                <div class="tab-content" id="pills-tabContent">
+                        <div class="tab-pane fade show active" id="pills-disciption" role="tabpanel" aria-labelledby="disciption-tab">Здесь описание</div>
+                        <div class="tab-pane fade" id="pills-subprojects" role="tabpanel" aria-labelledby="subprojects-tab">Здесь подпроекты</div>
+                        <div class="tab-pane fade" id="pills-setting" role="tabpanel" aria-labelledby="setting-tab">Здесь настройки</div>
+                </div>
+        </main>
+
+        <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+        <!-- My scripts Library-->
+        <script src="lib/TreeModel.js"></script>
+        <script src="lib/arrive.js"></script>
+
+        <!-- My scripts -->
+        <script src="scripts/main.js"></script>
+        <script src="scripts/project.js"></script>
+    </body>
+</html>

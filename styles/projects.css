@@ -1,12 +1,4 @@
 /* Show it is fixed to the top */
-body {
-    padding-top: 4.5rem;
-    background-color: #F8F9FA;
-  }
-
-#button-nav a i{
-    font-size: 30px;
-}
 
 .project{
     width: 300px;

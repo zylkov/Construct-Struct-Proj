@@ -7,3 +7,11 @@ a img,:link img,:visited img { border:none }
 address { font-style:normal }
 
 
+body {
+    padding-top: 4.5rem;
+    background-color: #F8F9FA;
+  }
+
+#button-nav a i{
+    font-size: 30px;
+}
