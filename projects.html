@@ -21,7 +21,7 @@
             <nav class="navbar navbar-light fixed-top bg-primary">
                     <a class="navbar-brand text-white">Проект</a>
                     <div class="form-inline " id="button-nav">
-                            <a class="btn btn-outline-primary" >
+                            <a class="btn btn-outline-primary mybtn-add" >
                                 <i class="material-icons">
                                     add
                                 </i>
@@ -37,21 +37,70 @@
                 <main role="main" class="container">
                     <div class="projects d-flex justify-content-start flex-wrap">
                         
-                        <div class="card project d-flex flex-column align-items-stretch">
-                            <div class="card-body flex-grow-2">
-                                <h5 class="card-title">Название</h5>
-                                <p class="card-text">Лалалала пппппппппппапапапаапописание</p>
-                            
-                            </div>
-                            <div class="card-buttons">
-                                    <a href="#" class="btn btn-primary">Открыть</a>
-                                    <a href="#" class="btn btn-danger">Удалить</a>
-                            </div>
-                        </div>
-
-                    
+                        
                     </div>
                 </main>
+
+        <!--Modals-->
+        <div id="modalContainer">
+            <div class="modal fade" id="proptModal" tabindex="-1" role="dialog" aria-labelledby="proptModalTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="proptModalTitle">Заголовок</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                        
+                      <div class="form-group">
+                          <label id="questionText" for="answerInput">Вопрос</label>
+                          <input class="form-control" id="answerInput" type="text">
+                      </div>
+            
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                      <button type="button" class="btn btn-primary" id="answerOnQuestion">Сохранить изменение</button>
+                    </div>
+                  </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="newProjectModal" tabindex="-1" role="dialog" aria-labelledby="newProjectModalModalTitle" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="newProjectModalModalTitle">Создание нового проекта</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                     
+                    <form>
+                        <div class="form-group">
+                            <label class="h5" for="nameFormControlInput">Название</label>
+                            <input class="form-control" id="nameFormControlInput" type="text">
+                        </div>
+                        <hr>
+                        <div class="form-group">
+                            <label class="h5" for="discriptionFormControlTextarea">Описание</label>
+                            <textarea class="form-control" id="discriptionFormControlTextarea" rows="3"></textarea>
+                        </div>
+                    </form>
+        
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                    <button type="button" class="btn btn-primary mybtn-saveAdd">Создать</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+                      
+        </div>
         <!-- Optional JavaScript -->
         <!-- jQuery first, then Popper.js, then Bootstrap JS -->
         <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
@@ -64,5 +113,6 @@
 
         <!-- My scripts -->
         <script src="scripts/main.js"></script>
+        <script src="scripts/projects.js"></script>
     </body>
 </html>
