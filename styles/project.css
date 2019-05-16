@@ -1,0 +1,15 @@
+.nav-pills > li > a{
+    color:#303136;
+}
+
+.nav-pills .nav-link{
+  border-radius: 0;
+}
+.nav-pills > li > a:hover{
+    border: medium none;
+    border-radius: 0;
+}
+.tab-pane{
+    background-color: grey;
+    width: 100%;
+}
