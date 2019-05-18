@@ -18,7 +18,7 @@
  <body>
 
 
-  <!-- Tree view -->
+  <!-- Navbar -->
   <nav class="navbar navbar-light fixed-top bg-primary">
     <div>
         <a class="btn " href="/projects" >
@@ -41,19 +41,30 @@
             </a>
     </div>
   </nav>
-  <div id="displayContainer">
-    <div id="drawContainer">
-      <div id="svgContainer" style="margin: 50px 50px;">
-        <svg id="svg1" width="0" height="0" >
-            
-        </svg>
+  <!-- Tree view -->
+  <div id="loaderTreeContainer" class="d-flex flex-column justify-content-center align-items-center" >
+      <div class="spinner-border" role="status">
+          <span class="sr-only">Loading...</span>
       </div>
+      <div class="font-weight-normal h3">
+        Загрузка рабочей области...
+      </div>
+  </div>
+    <div id="displayContainer">
+      <div id="drawContainer">
+        <div id="svgContainer" style="margin: 50px 50px;">
+          <svg id="svg1" width="0" height="0" >
+              
+          </svg>
+        </div>
+        <button id="mybtn-movetostart" class="btn btn-primary d-none">
+          Вставить
+        </button>
+        <div id="tree" class="tree">
 
-      <div id="tree" class="tree">
-
+        </div>
       </div>
     </div>
-  </div>
 
   
 
@@ -69,24 +80,16 @@
             </button>
           </div>
           <div class="modal-body">
-              <div class="loading d-flex justify-content-center">
-                  <div class="spinner-border" role="status">
-                      <span class="sr-only">Loading...</span>
+              <form>
+                  <div class="form-group">
+                      <label class="h5" for="discriptionFormControlTextarea">Описание</label>
+                      <textarea class="form-control" id="discriptionFormControlTextarea" rows="3"></textarea>
                   </div>
-              </div>
-              <div class="loaded d-none">
-                <form>
-                    <div class="form-group">
-                        <label class="h5" for="discriptionFormControlTextarea">Описание</label>
-                        <textarea class="form-control" id="discriptionFormControlTextarea" rows="3"></textarea>
-                    </div>
-                </form>
-              </div>
-
+              </form>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
-            <button type="button" class="btn btn-primary">Сохранить изменение</button>
+            <button type="button" class="btn btn-primary mybtn-savechange">Сохранить изменение</button>
           </div>
         </div>
       </div>
@@ -103,12 +106,8 @@
             </button>
           </div>
           <div class="modal-body">
-            <div class="loading d-flex justify-content-center">
-                  <div class="spinner-border" role="status">
-                      <span class="sr-only">Loading...</span>
-                  </div>
-            </div>
-            <div class="loaded d-none">
+            
+            
               <form>
                 <div class="form-group">
                     <label for="typeFunctionFormControlSelect" class="h5">Тип функции</label>
@@ -132,11 +131,11 @@
                   <h5>Структура</h5>
                   <button class="btn btn-warning">Изменить структуру</button>
                 </div>
-            </div>
+            
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
-            <button type="button" class="btn btn-primary">Сохранить изменение</button>
+            <button type="button" class="btn btn-primary mybtn-savechange">Сохранить изменение</button>
           </div>
         </div>
       </div>

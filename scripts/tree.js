@@ -362,10 +362,10 @@ function getNode(root,id){
     });
 }
 
-function addChildNode(tree,root,idparent,id,title,children=[],listfunct=[]){
+function addChildNode(tree,root,idparent,id,title,discription,children=[],listfunct=[]){
     
 
-    node = tree.parse({id,title,children,listfunct});
+    node = tree.parse({id,title,children,listfunct,discription});
     nodeparent = getNode(root,idparent);
 
     nodeparent.addChild(node);
@@ -423,104 +423,118 @@ function getInfoFunct(idParent, id){
     });
 }
 
+function getDataTree(){
+    return new Promise((resolve, reject) => {
 
+        let testdata = {
+            id:0,
+            title:"Начало дерева",
+            children:[
+                {
+                    id:1,
+                    title:"Блок 1",
+                    discription:"Я блок ы",
+                    listfunct:[
+                        {
+                        id:1,
+                        title:"Функция 1",
+                        discription:" лалала",
+                        type:"single"
+                    }],
+                    children:[
+                    {
+                        id:2,
+                        title:"Блок 1 - 1",
+                        discription:"",
+                        children:[],
+                        listfunct:[]
+                    },
+                    {
+                        id:3,
+                        title:"Блок 1 - 2",
+                        discription:"",
+                        children:[],
+                        listfunct:[]
+                    }, 
+                    ]
+                },
+                {
+                    id:4,
+                    title:"Блок 2",
+                    discription:"",
+                    listfunct:[],
+                    children:[
+                    {
+                        id:5,
+                        title:"Блок 2 - 1",
+                        discription:"",
+                        listfunct:[],
+                        children:[
+                            {
+                                id:6,
+                                title:"Блок 2 - 1 - 1",
+                                discription:"",
+                                children:[],
+                                listfunct:[
+                                    {
+                                        id:2,
+                                        title:"Функция 1",
+                                        discription:"",
+                                        type:"single"
+                                    },
+                                    {
+                                        id:3,
+                                        title:"Функция 2",
+                                        discription:"",
+                                        type:"single"
+                                    },
+                                    {
+                                        id:4,
+                                        title:"Функция 3",
+                                        discription:"",
+                                        type:"single"
+                                    }
+                                ]
+                            }
+                        ]
+                    } 
+                    ]
+                }
+            ]
+        }
+
+        setTimeout(() => {
+        resolve(testdata);
+        }, 1000);
+
+    });
+}
 
 $(document).ready(function() {
     // reset svg each time 
     $("#svg1").attr("height", "0");
     $("#svg1").attr("width", "0");
 
-    data = {
-        id:0,
-        title:"Начало дерева",
-        children:[
-            {
-                id:1,
-                title:"Блок 1",
-                discription:"Я блок ы",
-                listfunct:[
-                    {
-                    id:1,
-                    title:"Функция 1",
-                    discription:" лалала",
-                    type:"single"
-                }],
-                children:[
-                {
-                    id:2,
-                    title:"Блок 1 - 1",
-                    discription:"",
-                    children:[],
-                    listfunct:[]
-                },
-                {
-                    id:3,
-                    title:"Блок 1 - 2",
-                    discription:"",
-                    children:[],
-                    listfunct:[]
-                }, 
-                ]
-            },
-            {
-                id:4,
-                title:"Блок 2",
-                discription:"",
-                listfunct:[],
-                children:[
-                {
-                    id:5,
-                    title:"Блок 2 - 1",
-                    discription:"",
-                    listfunct:[],
-                    children:[
-                        {
-                            id:6,
-                            title:"Блок 2 - 1 - 1",
-                            discription:"",
-                            children:[],
-                            listfunct:[
-                                {
-                                    id:2,
-                                    title:"Функция 1",
-                                    discription:"",
-                                    type:"single"
-                                },
-                                {
-                                    id:3,
-                                    title:"Функция 2",
-                                    discription:"",
-                                    type:"single"
-                                },
-                                {
-                                    id:4,
-                                    title:"Функция 3",
-                                    discription:"",
-                                    type:"single"
-                                }
-                            ]
-                        }
-                    ]
-                } 
-                ]
-            }
-        ]
-    }
-    
-    tree = new TreeModel();
-    root = tree.parse(data);
+    getDataTree().then((treeData)=>{
+        $("#loaderTreeContainer").removeClass("d-flex").addClass("d-none");
+        $("#displayContainer").css("display","block");
 
-    showTree(root);  
-    setAllListner(tree, root);
-    
+        data = treeData;
+        tree = new TreeModel();
+        root = tree.parse(data);
+
+        showTree(root);  
+        setAllListner(tree, root);
+        
 
 
-    $("#functionInfoModal #typeFunctionFormControlSelect").change(function(){
-        value = $(this).val();
-        if(value === "single" || value === "discription")
-            $("#functionInfoModal #functionInfoModalStruct").addClass("d-none")
-        else
-            $("#functionInfoModal #functionInfoModalStruct").removeClass("d-none");
+        $("#functionInfoModal #typeFunctionFormControlSelect").change(function(){
+            value = $(this).val();
+            if(value === "single" || value === "discription")
+                $("#functionInfoModal #functionInfoModalStruct").addClass("d-none")
+            else
+                $("#functionInfoModal #functionInfoModalStruct").removeClass("d-none");
+        });
     });
 });
 
@@ -667,9 +681,9 @@ function setListnerOnNodeTool(tree,root,all = true, node = null){
         nodeParent = getNode(root, idNode);
         
         let callbackAddChild = (result) => {
-            newdata = {id:getRandomInt(10,100),title:result};
+            newdata = {id:getRandomInt(10,100),title:result, discription:""};
             
-            addChildNode(tree,root,idNode,newdata.id,newdata.title);
+            addChildNode(tree,root,idNode,newdata.id,newdata.title,newdata.discription);
             showChildBlock(idNode,newdata.id,newdata.title);
             connectChildNode(idNode,newdata.id);
             updatePath(root);
@@ -684,7 +698,7 @@ function setListnerOnNodeTool(tree,root,all = true, node = null){
         node = getNode(root,idNode);
 
         let callbackAddFunct = (result) => {
-            newFunct = {id:getRandomInt(10,100), title:result};
+            newFunct = {id:getRandomInt(10,100), title:result, discription:"",type:"single"};
             node.model.listfunct.push(newFunct);
             showBlockFunct(idNode,newFunct.id,newFunct.title);
         }
@@ -714,14 +728,20 @@ function setListnerOnNodeTool(tree,root,all = true, node = null){
 
         
 
-        $(`#block${idNode} .node .title`).css("background-color","red");
+        $(`#block${idNode} .node .title`).css("border-color","#ffc107");
+        $(`#block${idNode} .node .title`).css("background-color","#fff9e9");
 
         allButton = $('.block .parent .node .tool .MyBtn')
         allButton.prop("disabled",true);
+        allButton.addClass("d-none");
 
         buttonPaste = $(`.block .node`).not($(`#block${idNode} .node`)).find(".MyBtn-paste");
+        buttonPaste.removeClass("d-none");
         buttonPaste.prop("disabled",false);
         buttonPaste.css("display","block");
+
+        buttonMoveToStart = $("#mybtn-movetostart");
+        buttonMoveToStart.removeClass("d-none");
 
         updatePath(root);
 
@@ -732,7 +752,7 @@ function setListnerOnNodeTool(tree,root,all = true, node = null){
             removeConnectChildNodes(tree, root,[node]);
             removeBlock(node.model.id);
             removeNode(tree, root, idNode);
-            addChildNode(tree, root, idContanire, node.model.id, node.model.title, node.model.children, node.model.listfunct);
+            addChildNode(tree, root, idContanire, node.model.id, node.model.title, node.model.discription, node.model.children, node.model.listfunct);
             
             nodeChild = getNode(root,node.model.id);
             
@@ -741,8 +761,31 @@ function setListnerOnNodeTool(tree,root,all = true, node = null){
             buttonPaste.off("click");
             buttonPaste.css("display","none");
             allButton.prop("disabled",false);
+            allButton.removeClass("d-none");
             updatePath(root);
-        });   
+        });
+        
+        
+        buttonMoveToStart.click(function(){
+            idContanire = 0;
+            nodeContanire = getNode(root,idContanire);
+
+            removeConnectChildNodes(tree, root,[node]);
+            removeBlock(node.model.id);
+            removeNode(tree, root, idNode);
+            addChildNode(tree, root, idContanire, node.model.id, node.model.title, node.model.discription, node.model.children, node.model.listfunct);
+            
+            nodeChild = getNode(root,node.model.id);
+            
+            showPartTree([nodeChild],nodeChild.parent);
+            
+            buttonMoveToStart.off("click");
+            buttonPaste.css("display","none");
+            allButton.prop("disabled",false);
+            allButton.removeClass("d-none");
+            buttonMoveToStart.addClass("d-none");
+            updatePath(root);
+        });
 
     });
 
@@ -785,7 +828,7 @@ function setListnerOnNodeTool(tree,root,all = true, node = null){
             if(on){
                 childrens.forEach(function(node){
                             
-                    addChildNode(tree, root, idParent, node.model.id, node.model.title, node.model.children);
+                    addChildNode(tree, root, idParent, node.model.id, node.model.title, node.model.discription, node.model.children, node.model.listfunct);
                 });            
                 showPartTree(childrens,parentNode);
                 updatePath(root);
