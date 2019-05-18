@@ -1,9 +1,10 @@
+
+
+
 $(document).ready(function() {
-    console.log("HI");
-    $("#tabToggle label").click((e)=>{
-        e.preventDefault();
-        let tabObj = $(this).find("input");
-        console.log("jq obj",tabObj);
-        tabObj.tab("show");
-    });
+    $('a[data-toggle="pill"]').on('shown.bs.tab', function (e) {
+        let nameTab = $(e.target).text();
+        
+        nameTab==="Подпроекты" ? $(".mybtn-add").css("display", "block") : $(".mybtn-add").css("display", "none");
+      })
 });

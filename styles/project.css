@@ -10,11 +10,25 @@
     border-radius: 0;
 }
 .tab-pane{
-    background-color: grey;
     width: 100%;
 }
 
 .card-info{
     width: 800px;
     margin-top: 20px;
+}
+
+
+.project{
+    width: 300px;
+    margin: 10px;
+    height: 205px;
+}
+
+.project .card-buttons{
+    padding: 15px;
+}
+
+.mybtn-add{
+    display: none;
 }
