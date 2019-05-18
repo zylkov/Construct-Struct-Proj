@@ -175,7 +175,7 @@ function addHTMLBlock(el,id,title){
                     </div>
                 </div>
                 <div class="tool">
-                    <button class="MyBtn MyBtn-info btn btn-outline-info btn-sm" data-toggle="modal" data-target="#nodeInfoModal">
+                    <button class="MyBtn MyBtn-info btn btn-outline-info btn-sm">
                     Информация
                     </button>
                     <button class="MyBtn MyBtn-addchild btn btn-outline-success btn-sm">
@@ -241,7 +241,7 @@ function addHTMLFunct(el,id,title){
               </div>
 
               <div class="tool">
-                <button class="MyBtn MyBtn-info btn btn-outline-info btn-sm" data-toggle="modal" data-target="#functionInfoModal" >
+                <button class="MyBtn MyBtn-info btn btn-outline-info btn-sm" >
                  Информация
                 </button>
                 
@@ -437,12 +437,12 @@ $(document).ready(function() {
             {
                 id:1,
                 title:"Блок 1",
-                discription:"",
+                discription:"Я блок ы",
                 listfunct:[
                     {
                     id:1,
                     title:"Функция 1",
-                    discription:"",
+                    discription:" лалала",
                     type:"single"
                 }],
                 children:[
@@ -513,12 +513,7 @@ $(document).ready(function() {
     showTree(root);  
     setAllListner(tree, root);
     
-    $('#nodeInfoModal').on('hidden.bs.modal', function (e) {
-        turnLoadingOnModal($(this),true);
-    });
-    $('#functionInfoModal').on('hidden.bs.modal', function (e) {
-        turnLoadingOnModal($(this),true);
-    });
+
 
     $("#functionInfoModal #typeFunctionFormControlSelect").change(function(){
         value = $(this).val();
@@ -578,25 +573,31 @@ function setListnerOnFunctionTool(tree,root,type = "all", node = null) {
 
         node = getNode(root, idNode);
         objIndex = node.model.listfunct.findIndex((obj => obj.id === idFunct));
+        functModel = node.model.listfunct[objIndex];
+        let callbackReady = (modals) =>{
+            modals.find("#functionInfoModalTitle").text(functModel.title);
+            let discriptionFormControlTextarea = modals.find("#discriptionFormControlTextarea");
+            let typeFunctionFormControlSelect = modals.find("#typeFunctionFormControlSelect");
+            let buttonSaveChange = modals.find(".mybtn-savechange");
+            
+            discriptionFormControlTextarea.val("");
+            discriptionFormControlTextarea.val(functModel.discription);
 
-        $("#functionInfoModalTitle").text(node.model.listfunct[objIndex].title);
-        getInfoFunct(idNode, idFunct).then(
-            (result) => {
-               let modals = $("#functionInfoModal");
-               turnLoadingOnModal(modals, false);
-               modals.find("#discriptionFormControlTextarea").val(result.discription);
-               modals.find("#typeFunctionFormControlSelect").val(result.type);
-        
-               if(result.type === "single" || result.type === "discription")
-                    $("#functionInfoModal #functionInfoModalStruct").addClass("d-none")
-               else
-                    $("#functionInfoModal #functionInfoModalStruct").removeClass("d-none");
-            },
+            typeFunctionFormControlSelect.val(functModel.type);
+            if(functModel.type === "single" || functModel.type === "discription")
+                $("#functionInfoModal #functionInfoModalStruct").addClass("d-none")
+            else
+                $("#functionInfoModal #functionInfoModalStruct").removeClass("d-none");
 
-            (msgerror) => {
+            buttonSaveChange.click(()=>{
+                node.model.listfunct[objIndex].discription = discriptionFormControlTextarea.val();
+                node.model.listfunct[objIndex].type = typeFunctionFormControlSelect.val();
+                buttonSaveChange.off();
+                modals.modal('hide');
+            });
+        }
 
-            }
-        )
+        openModal("functionInfoModal", callbackReady);
     });
     button(".MyBtn-remove").click(function(){
         idNode = getIdNodeChild($(this));
@@ -641,18 +642,22 @@ function setListnerOnNodeTool(tree,root,all = true, node = null){
         idNode = getIdNodeChild($(this));
         console.log("Был нажат блок под id",idNode);
         node = getNode(root, idNode);
-        $("#nodeInfoModalTitle").text(node.model.title);
-        getInfoFunctBlock(idNode).then(
-            (result) => {
-               let modals = $("#nodeInfoModal");
-               turnLoadingOnModal(modals, false);
-               modals.find("#discriptionFormControlTextarea").val(result.discription);
-            },
 
-            (msgerror) => {
+        let callbackReady = (modals) =>{
+            modals.find("#nodeInfoModalTitle").text(node.model.title);
+            let discriptionFormControlTextarea = modals.find("#discriptionFormControlTextarea");
+            let buttonSaveChange = modals.find(".mybtn-savechange");
+            discriptionFormControlTextarea.val("");
+            discriptionFormControlTextarea.val(node.model.discription);
 
-            }
-        )
+            buttonSaveChange.click(()=>{
+                node.model.discription = discriptionFormControlTextarea.val();
+                buttonSaveChange.off();
+                modals.modal('hide');
+            });
+        };
+
+        openModal("nodeInfoModal", callbackReady);
 
     });
  

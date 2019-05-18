@@ -2,6 +2,16 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min)) + min;
 }
 
+function openModal(idModal,callbackPre = ()=>{}, callbackAfter = ()=>{}){
+    let modals = $(`#${idModal}`);
+    callbackPre(modals);
+    modals.on('shown.bs.modal', function (e) {
+        callbackAfter(modals);
+        modals.off("shown.bs.modal");    
+    });
+    modals.modal('show');
+}
+
 
 function turnLoadingOnModal(modals, on){
     if(on){
