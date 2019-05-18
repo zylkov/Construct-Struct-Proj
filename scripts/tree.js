@@ -437,21 +437,26 @@ $(document).ready(function() {
             {
                 id:1,
                 title:"Блок 1",
+                discription:"",
                 listfunct:[
                     {
                     id:1,
-                    title:"Функция 1"
+                    title:"Функция 1",
+                    discription:"",
+                    type:"single"
                 }],
                 children:[
                 {
                     id:2,
                     title:"Блок 1 - 1",
+                    discription:"",
                     children:[],
                     listfunct:[]
                 },
                 {
                     id:3,
                     title:"Блок 1 - 2",
+                    discription:"",
                     children:[],
                     listfunct:[]
                 }, 
@@ -460,29 +465,38 @@ $(document).ready(function() {
             {
                 id:4,
                 title:"Блок 2",
+                discription:"",
                 listfunct:[],
                 children:[
                 {
                     id:5,
                     title:"Блок 2 - 1",
+                    discription:"",
                     listfunct:[],
                     children:[
                         {
                             id:6,
                             title:"Блок 2 - 1 - 1",
+                            discription:"",
                             children:[],
                             listfunct:[
                                 {
                                     id:2,
-                                    title:"Функция 1"
+                                    title:"Функция 1",
+                                    discription:"",
+                                    type:"single"
                                 },
                                 {
                                     id:3,
-                                    title:"Функция 2"
+                                    title:"Функция 2",
+                                    discription:"",
+                                    type:"single"
                                 },
                                 {
                                     id:4,
-                                    title:"Функция 2"
+                                    title:"Функция 3",
+                                    discription:"",
+                                    type:"single"
                                 }
                             ]
                         }
