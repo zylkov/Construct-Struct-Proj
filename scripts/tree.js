@@ -574,7 +574,7 @@ function setListnerOnFunctionTool(tree,root,type = "all", node = null) {
         node = getNode(root, idNode);
         objIndex = node.model.listfunct.findIndex((obj => obj.id === idFunct));
         functModel = node.model.listfunct[objIndex];
-        let callbackReady = (modals) =>{
+        let callbackReady = function(modals) {
             modals.find("#functionInfoModalTitle").text(functModel.title);
             let discriptionFormControlTextarea = modals.find("#discriptionFormControlTextarea");
             let typeFunctionFormControlSelect = modals.find("#typeFunctionFormControlSelect");
@@ -589,7 +589,7 @@ function setListnerOnFunctionTool(tree,root,type = "all", node = null) {
             else
                 $("#functionInfoModal #functionInfoModalStruct").removeClass("d-none");
 
-            buttonSaveChange.click(()=>{
+            buttonSaveChange.click(function(){
                 node.model.listfunct[objIndex].discription = discriptionFormControlTextarea.val();
                 node.model.listfunct[objIndex].type = typeFunctionFormControlSelect.val();
                 buttonSaveChange.off();
@@ -639,11 +639,12 @@ function setListnerOnNodeTool(tree,root,all = true, node = null){
     }
 
     button(".MyBtn-info").click(function(){
-        idNode = getIdNodeChild($(this));
+        let idNode = getIdNodeChild($(this));
         console.log("Был нажат блок под id",idNode);
-        node = getNode(root, idNode);
+        let node = getNode(root, idNode);
 
-        let callbackReady = (modals) =>{
+        let callbackReady = (modals) => {
+            
             modals.find("#nodeInfoModalTitle").text(node.model.title);
             let discriptionFormControlTextarea = modals.find("#discriptionFormControlTextarea");
             let buttonSaveChange = modals.find(".mybtn-savechange");
@@ -651,9 +652,15 @@ function setListnerOnNodeTool(tree,root,all = true, node = null){
             discriptionFormControlTextarea.val(node.model.discription);
 
             buttonSaveChange.click(()=>{
+                console.log(`Данные будут записанны в ф.б. id ${idNode}`,discriptionFormControlTextarea.val());
                 node.model.discription = discriptionFormControlTextarea.val();
                 buttonSaveChange.off();
                 modals.modal('hide');
+            });
+
+            modals.on('hide.bs.modal', () => {
+                buttonSaveChange.off();
+                modals.off("hide.bs.modal");   
             });
         };
 

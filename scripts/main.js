@@ -25,17 +25,21 @@ function turnLoadingOnModal(modals, on){
 }
 
 function promptModal(title = "Заголовок", question = "Вопрос?" , defualtAnswer = "", callbackAnswered = ()=>{}){
-    modals = $("#proptModal");
+    let modals = $("#proptModal");
     modals.find("#proptModalTitle").text(title);
     modals.find("#questionText").text(question);
-    answerInput = modals.find("#answerInput");
+    let answerInput = modals.find("#answerInput");
     answerInput.val(defualtAnswer);
 
-    button = modals.find("#answerOnQuestion");
+    let button = modals.find("#answerOnQuestion");
     button.click(()=>{
         callbackAnswered(answerInput.val());
         modals.modal('hide');
         button.off("click");
+    });
+    modals.on('hide.bs.modal', ()=>{
+        button.off("click"); 
+        modals.off("hide.bs.modal");    
     });
 
     modals.modal("show");
@@ -45,9 +49,9 @@ function promptModal(title = "Заголовок", question = "Вопрос?" , 
 function confirmModal(title = "Заголовок", question = "Вопрос?" , callbackAnswered = ()=>{}){
     return new Promise((resolve, reject) => {
 
-        id = $("confirmModal").length + getRandomInt(0,100);
+        let id = $("confirmModal").length + getRandomInt(0,100);
 
-        htmlModal = `
+        let htmlModal = `
         <div class="modal fade" id="confirmModal${id}" class="confirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalTitle${id}" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
@@ -74,32 +78,32 @@ function confirmModal(title = "Заголовок", question = "Вопрос?" ,
 
         $("#modalContainer").append(htmlModal);
 
-        modals = $(`#confirmModal${id}`);
+        let modals = $(`#confirmModal${id}`);
         
         modals.find(`#confirmModalTitle${id}`).text(title);
         modals.find(".questionTextConfirm").text(question);
 
-        answerYes = modals.find(".answerYes");
-        answerNo = modals.find(".answerNo");
+        let answerYes = modals.find(".answerYes");
+        let answerNo = modals.find(".answerNo");
         
         answerYes.click(()=>{
-            returnData = callbackAnswered(true);
+            let returnDataYes = callbackAnswered(true);
             answerYes.off("click");
             modals.modal('hide');
-            modals.on('hidden.bs.modal', function (e) {
+            modals.on('hidden.bs.modal',  ()=> {
                 modals.modal('dispose');
-                resolve(returnData);
+                resolve(returnDataYes);
             });
             
         });
 
         answerNo.click(()=>{
-            returnData = callbackAnswered(false);
+            let returnDataNo = callbackAnswered(false);
             answerNo.off("click");
             modals.modal('hide');
-            modals.on('hidden.bs.modal', function (e) {
+            modals.on('hidden.bs.modal', () => {
                 modals.modal('dispose');
-                resolve(returnData);
+                resolve(returnDataNo);
             });
             
         });
