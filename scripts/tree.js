@@ -362,10 +362,10 @@ function getNode(root,id){
     });
 }
 
-function addChildNode(tree,root,idparent,id,title,children=[],listfunct=[]){
+function addChildNode(tree,root,idparent,id,title, discription ="" ,children=[],listfunct=[]){
     
 
-    node = tree.parse({id,title,children,listfunct});
+    node = tree.parse({id,title,children,listfunct,discription});
     nodeparent = getNode(root,idparent);
 
     nodeparent.addChild(node);
@@ -667,9 +667,9 @@ function setListnerOnNodeTool(tree,root,all = true, node = null){
         nodeParent = getNode(root, idNode);
         
         let callbackAddChild = (result) => {
-            newdata = {id:getRandomInt(10,100),title:result};
+            newdata = {id:getRandomInt(10,100),title:result,discription:""};
             
-            addChildNode(tree,root,idNode,newdata.id,newdata.title);
+            addChildNode(tree,root,idNode,newdata.id,newdata.title, newdata.discription);
             showChildBlock(idNode,newdata.id,newdata.title);
             connectChildNode(idNode,newdata.id);
             updatePath(root);
@@ -732,7 +732,7 @@ function setListnerOnNodeTool(tree,root,all = true, node = null){
             removeConnectChildNodes(tree, root,[node]);
             removeBlock(node.model.id);
             removeNode(tree, root, idNode);
-            addChildNode(tree, root, idContanire, node.model.id, node.model.title, node.model.children, node.model.listfunct);
+            addChildNode(tree, root, idContanire, node.model.id, node.model.title, node.model.discription, node.model.children, node.model.listfunct);
             
             nodeChild = getNode(root,node.model.id);
             
@@ -785,7 +785,7 @@ function setListnerOnNodeTool(tree,root,all = true, node = null){
             if(on){
                 childrens.forEach(function(node){
                             
-                    addChildNode(tree, root, idParent, node.model.id, node.model.title, node.model.children);
+                    addChildNode(tree, root, idParent, node.model.id, node.model.title, node.model.discription, node.model.children, node.model.listfunct);
                 });            
                 showPartTree(childrens,parentNode);
                 updatePath(root);
