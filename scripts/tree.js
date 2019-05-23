@@ -521,7 +521,7 @@ function setListnerOnFunctionTool(tree,root,type = "all", node = null) {
     function(tag){
        return (
         type === "all" ? $(`.funct .tool ${tag}`) :
-        type === "listfunct" ? node.find(`.parent .list-funct .funct .tool ${tag}`).first() :
+        type === "listfunct" ? node.find(`.parent .list-funct`).first().find(`.funct .tool ${tag}`) :
         type === "funct" ? node.find(`.tool ${tag}`).first() :
         console.warn(`type: ${type} not exist`) 
         );
