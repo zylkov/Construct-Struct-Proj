@@ -536,15 +536,15 @@ function setListnerOnFunctionTool(tree,root,type = "all", node = null) {
     }
 
     button(".MyBtn-info").click(function(){
-        idFunct = getIdFunct($(this));
-        idNode = getIdNodeChild($(this));
+        let idFunct = getIdFunct($(this));
+        let idNode = getIdNodeChild($(this));
         console.log("Нажата функция под id: ",idFunct);
         console.log("Родитель id:", idNode);
 
-        node = getNode(root, idNode);
-        objIndex = node.model.listfunct.findIndex((obj => obj.id === idFunct));
-        functModel = node.model.listfunct[objIndex];
-        let callbackReady = function(modals) {
+        let node = getNode(root, idNode);
+        let objIndex = node.model.listfunct.findIndex((obj => obj.id === idFunct));
+        let functModel = node.model.listfunct[objIndex];
+        let callbackReady = (modals) => {
             modals.find("#functionInfoModalTitle").text(functModel.title);
             let discriptionFormControlTextarea = modals.find("#discriptionFormControlTextarea");
             let typeFunctionFormControlSelect = modals.find("#typeFunctionFormControlSelect");
@@ -559,11 +559,16 @@ function setListnerOnFunctionTool(tree,root,type = "all", node = null) {
             else
                 $("#functionInfoModal #functionInfoModalStruct").removeClass("d-none");
 
-            buttonSaveChange.click(function(){
+            buttonSaveChange.click(()=>{
                 node.model.listfunct[objIndex].discription = discriptionFormControlTextarea.val();
                 node.model.listfunct[objIndex].type = typeFunctionFormControlSelect.val();
                 buttonSaveChange.off();
                 modals.modal('hide');
+            });
+
+            modals.on('hide.bs.modal', () => {
+                buttonSaveChange.off();
+                modals.off("hide.bs.modal");   
             });
         }
 
