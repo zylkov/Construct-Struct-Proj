@@ -666,7 +666,7 @@ function setListnerOnNodeTool(tree,root,all = true, node = null){
         node = getNode(root,idNode);
 
         let callbackAddFunct = (result) => {
-            newFunct = {id:getRandomInt(10,100), title:result};
+            newFunct = {id:getRandomInt(10,100), title:result, discription:"", type: "single"};
             node.model.listfunct.push(newFunct);
             showBlockFunct(idNode,newFunct.id,newFunct.title);
         }
