@@ -741,12 +741,35 @@ function setListnerOnNodeTool(tree,root,all = true, node = null){
             showPartTree([nodeChild],nodeChild.parent);
             
             buttonPaste.off("click");
+            buttonMoveToStart.off("click");
             buttonPaste.css("display","none");
             allButton.prop("disabled",false);
             allButton.removeClass("d-none");
             buttonMoveToStart.addClass("d-none");
             updatePath(root);
-        });   
+        });
+        
+        buttonMoveToStart.click(function(){
+            idContanire = 0;
+            nodeContanire = getNode(root,idContanire);
+
+            removeConnectChildNodes(tree, root,[node]);
+            removeBlock(node.model.id);
+            removeNode(tree, root, idNode);
+            addChildNode(tree, root, idContanire, node.model.id, node.model.title, node.model.discription, node.model.children, node.model.listfunct);
+            
+            nodeChild = getNode(root,node.model.id);
+            
+            showPartTree([nodeChild],nodeChild.parent);
+            
+            buttonMoveToStart.off("click");
+            buttonPaste.off("click");
+            buttonPaste.css("display","none");
+            allButton.prop("disabled",false);
+            allButton.removeClass("d-none");
+            buttonMoveToStart.addClass("d-none");
+            updatePath(root);
+        });
 
     });
 
