@@ -394,103 +394,117 @@ function getInfoFunct(idParent, id){
 }
 
 
+function getDataTree(){
+    return new Promise((resolve,reject) => {
+        let testdata = {
+            id:0,
+            title:"Начало дерева",
+            children:[
+                {
+                    id:1,
+                    title:"Блок 1",
+                    discription:"Я блок ы",
+                    listfunct:[
+                        {
+                        id:1,
+                        title:"Функция 1",
+                        discription:" лалала",
+                        type:"single"
+                    }],
+                    children:[
+                    {
+                        id:2,
+                        title:"Блок 1 - 1",
+                        discription:"",
+                        children:[],
+                        listfunct:[]
+                    },
+                    {
+                        id:3,
+                        title:"Блок 1 - 2",
+                        discription:"",
+                        children:[],
+                        listfunct:[]
+                    }, 
+                    ]
+                },
+                {
+                    id:4,
+                    title:"Блок 2",
+                    discription:"",
+                    listfunct:[],
+                    children:[
+                    {
+                        id:5,
+                        title:"Блок 2 - 1",
+                        discription:"",
+                        listfunct:[],
+                        children:[
+                            {
+                                id:6,
+                                title:"Блок 2 - 1 - 1",
+                                discription:"",
+                                children:[],
+                                listfunct:[
+                                    {
+                                        id:2,
+                                        title:"Функция 1",
+                                        discription:"",
+                                        type:"single"
+                                    },
+                                    {
+                                        id:3,
+                                        title:"Функция 2",
+                                        discription:"",
+                                        type:"single"
+                                    },
+                                    {
+                                        id:4,
+                                        title:"Функция 3",
+                                        discription:"",
+                                        type:"single"
+                                    }
+                                ]
+                            }
+                        ]
+                    } 
+                    ]
+                }
+            ]
+        }
+
+        setTimeout(() => {
+            resolve(testdata);
+            }, 1000);
+    });
+}
+
 
 $(document).ready(function() {
     // reset svg each time 
     $("#svg1").attr("height", "0");
     $("#svg1").attr("width", "0");
 
-    data = {
-        id:0,
-        title:"Начало дерева",
-        children:[
-            {
-                id:1,
-                title:"Блок 1",
-                discription:"Я блок ы",
-                listfunct:[
-                    {
-                    id:1,
-                    title:"Функция 1",
-                    discription:" лалала",
-                    type:"single"
-                }],
-                children:[
-                {
-                    id:2,
-                    title:"Блок 1 - 1",
-                    discription:"",
-                    children:[],
-                    listfunct:[]
-                },
-                {
-                    id:3,
-                    title:"Блок 1 - 2",
-                    discription:"",
-                    children:[],
-                    listfunct:[]
-                }, 
-                ]
-            },
-            {
-                id:4,
-                title:"Блок 2",
-                discription:"",
-                listfunct:[],
-                children:[
-                {
-                    id:5,
-                    title:"Блок 2 - 1",
-                    discription:"",
-                    listfunct:[],
-                    children:[
-                        {
-                            id:6,
-                            title:"Блок 2 - 1 - 1",
-                            discription:"",
-                            children:[],
-                            listfunct:[
-                                {
-                                    id:2,
-                                    title:"Функция 1",
-                                    discription:"",
-                                    type:"single"
-                                },
-                                {
-                                    id:3,
-                                    title:"Функция 2",
-                                    discription:"",
-                                    type:"single"
-                                },
-                                {
-                                    id:4,
-                                    title:"Функция 3",
-                                    discription:"",
-                                    type:"single"
-                                }
-                            ]
-                        }
-                    ]
-                } 
-                ]
-            }
-        ]
-    }
     
-    tree = new TreeModel();
-    root = tree.parse(data);
+    getDataTree().then((treeData)=>{
+        $("#loaderTreeContainer").removeClass("d-flex").addClass("d-none");
+        $("#displayContainer").css("display","block");
+        data = treeData;
+        tree = new TreeModel();
+        root = tree.parse(data);
 
-    showTree(root);  
-    setAllListner(tree, root);
-    
+        showTree(root);  
+        setAllListner(tree, root);
+        
 
 
-    $("#functionInfoModal #typeFunctionFormControlSelect").change(function(){
-        value = $(this).val();
-        if(value === "single" || value === "discription")
-            $("#functionInfoModal #functionInfoModalStruct").addClass("d-none")
-        else
-            $("#functionInfoModal #functionInfoModalStruct").removeClass("d-none");
+        $("#functionInfoModal #typeFunctionFormControlSelect").change(() => {
+            value = $(this).val();
+            if(value === "single" || value === "discription")
+                $("#functionInfoModal #functionInfoModalStruct").addClass("d-none")
+            else
+                $("#functionInfoModal #functionInfoModalStruct").removeClass("d-none");
+        });
     });
 });
 
@@ -696,7 +710,7 @@ function setListnerOnNodeTool(tree,root,all = true, node = null){
 
         
 
-        $(`#block${idNode} .node .title`).css("background-color","red");
+        
 
         allButton = $('.block .parent .node .tool .MyBtn')
         allButton.prop("disabled",true);
