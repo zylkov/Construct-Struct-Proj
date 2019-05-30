@@ -710,14 +710,20 @@ function setListnerOnNodeTool(tree,root,all = true, node = null){
 
         
 
-        
+        $(`#block${idNode} .node .title`).css("border-color","#ffc107");
+        $(`#block${idNode} .node .title`).css("background-color","#fff9e9");
 
         allButton = $('.block .parent .node .tool .MyBtn')
         allButton.prop("disabled",true);
+        allButton.addClass("d-none");
 
         buttonPaste = $(`.block .node`).not($(`#block${idNode} .node`)).find(".MyBtn-paste");
+        buttonPaste.removeClass("d-none");
         buttonPaste.prop("disabled",false);
         buttonPaste.css("display","block");
+
+        buttonMoveToStart = $("#mybtn-movetostart");
+        buttonMoveToStart.removeClass("d-none");
 
         updatePath(root);
 
@@ -737,6 +743,8 @@ function setListnerOnNodeTool(tree,root,all = true, node = null){
             buttonPaste.off("click");
             buttonPaste.css("display","none");
             allButton.prop("disabled",false);
+            allButton.removeClass("d-none");
+            buttonMoveToStart.addClass("d-none");
             updatePath(root);
         });   
 
