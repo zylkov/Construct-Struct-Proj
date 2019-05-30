@@ -505,6 +505,23 @@ $(document).ready(function() {
             else
                 $("#functionInfoModal #functionInfoModalStruct").removeClass("d-none");
         });
+
+        $("#button-nav .mybtn-add").click(()=>{
+            
+            let callbackAddChild = (result) => {
+                let newdata = {id:getRandomInt(10,100), title:result, discription:""};
+                let idContanire = 0;
+                
+                addChildNode(tree, root, idContanire, newdata.id, newdata.title, newdata.discription);
+                
+                let nodeChild = getNode(root, newdata.id);
+                showPartTree([nodeChild], nodeChild.parent);
+            };
+            
+            promptModal("Создание нового функционального блока",
+            `Введите название нового функционального блока `,
+            "Новый блок", callbackAddChild);
+        });
     });
 });
 
