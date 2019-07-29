@@ -63,11 +63,18 @@ function getDataTree(){
                     discription:"Я блок ы",
                     listfunct:[
                         {
-                        id:1,
-                        title:"Функция 1",
-                        discription:" лалала",
-                        type:"single"
-                    }],
+                            id:1,
+                            title:"Функция 1",
+                            discription:" лалала",
+                            type:"single"
+                        },
+                        {
+                            id:2,
+                            title:"Функция 2",
+                            discription:" лалала",
+                            type:"single"
+                        },
+                    ],
                     children:[
                     {
                         id:2,
@@ -89,7 +96,20 @@ function getDataTree(){
                     id:4,
                     title:"Блок 2",
                     discription:"",
-                    listfunct:[],
+                    listfunct:[
+                        {
+                            id:1,
+                            title:"Функция 1",
+                            discription:" лалала",
+                            type:"single"
+                        },
+                        {
+                            id:2,
+                            title:"Функция 2",
+                            discription:" лалала",
+                            type:"single"
+                        },
+                    ],
                     children:[
                     {
                         id:5,
@@ -152,8 +172,8 @@ function showTree(){
         
         if(path.length === 2)
         {
-            addHTMLBlock($("#tree"),id,title);
-            //showListFunct(id,listfunct);
+            addHTMLBlock($("#tree"), id, title);
+            showListFunct($("#tree"), id, listfunct);
         }
         // else if(path.length >= 3)
         // {
@@ -168,17 +188,72 @@ function showTree(){
     });
 }
 
+function showListFunct (jqTree, idNode, listFuncts){
+    jqNode = jqTree.find(`#block${idNode} .parent .list-funct `).first();
+    
+    listFuncts.forEach(function(elementFunct) {
+        addHTMLFunct(jqNode, idNode, elementFunct.id, elementFunct.title);
+    });
+}
+
 // HTML Manipulation Functions
 
-function addHTMLBlock(el,id,title){
-    
+function addHTMLFunct(jqNode, idNode, id, title){
     const htmlblock=`
-    <div class="block" id="block${id}">
+    <div class="funct" id="funct${id}">
+
+              <div class="title">
+                <div class="text">
+                  ${title}
+                </div>
+              </div>
+
+              <div class="tool">
+                <button class="MyBtn MyBtn-info btn btn-outline-info btn-sm" >
+                 Информация
+                </button>
+                
+                <button class="MyBtn MyBtn-edit btn btn-outline-warning btn-sm">
+                 Редактировать
+                </button>
+
+                <button class="MyBtn MyBtn-remove btn btn-outline-danger btn-sm">
+                 Удалить
+                </button>
+              </div>
+
+    </div>`;
+
+    let jqEl = $(htmlblock);
+    setListnerOnFunctionTool(jqEl, id, idNode);
+    jqNode.append(jqEl);
+    
+}
+
+function setListnerOnFunctionTool(jqFuctional, idFuctional, idNode){
+   
+    jqFuctional.find(`.tool button`).click(function(){
+        console.log(`Была нажата кнопка на функции id:${idFuctional} элемента id:${idNode} с названем:${ $(this).text() } `);
+    });
+
+    const button = function(tag){
+        return jqFuctional.find(`.tool ${tag}`).first();
+    }
+
+    button(".MyBtn-info").click(()=>{});
+    button(".MyBtn-edit").click(()=>{});
+    button(".MyBtn-remove").click(()=>{});
+}
+
+function addHTMLBlock(jqTree, idNode, titleNode){
+    
+    const htmlBlock=`
+    <div class="block" id="block${idNode}">
         <div class="parent">
             <div class="node">
                 <div class="title">
                     <div class="text">
-                        ${title}
+                        ${titleNode}
                     </div>
                 </div>
                 <div class="tool">
@@ -217,9 +292,9 @@ function addHTMLBlock(el,id,title){
         </div>
     </div>`;
 
-    let jqEl = $(htmlblock);
-    setListnerOnNodeTool(jqEl, id);
-    el.append(jqEl);
+    let jqEl = $(htmlBlock);
+    setListnerOnNodeTool(jqEl, idNode);
+    jqTree.append(jqEl);
 
 }
 
@@ -233,7 +308,7 @@ function setListnerOnNodeTool(jqNode, idNode){
         return jqNode.find(`.parent .node .tool ${tag}`).first();
     }
 
-    let [node, setDataInNode] = useModelNode(idNode);
+    let [node, setDataInNode] = useModelNode(idNode); // cheack function 
 
     button(".MyBtn-info").click(()=>{});
     button(".MyBtn-addchild").click(()=>{});
