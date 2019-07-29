@@ -9,10 +9,10 @@ $(document).ready(function() {
 
 
     getDataTree().then((treeData)=>{
-        window.state = turnLoading(window.state);
+        turnLoading();
         const treeTool = new TreeModel();
         let dataTree = treeTool.parse(treeData);
-        window.state = changeState(window.state, "dataTree", dataTree);
+        changeState("dataTree", dataTree);
         showTree();
     });
 
@@ -21,8 +21,15 @@ $(document).ready(function() {
 
 // State Functions
 
-function changeState(state, index, data){
-    return {...state, [index]:data}
+function changeState(index, data){
+    const newState = {...window.state, [index]:data};
+    console.group(`Change State`);
+    console.log(`Model: ${index}`);
+    console.log(`Past data:`, window.state[index]);
+    window.state = newState;
+    console.log(`Current data:`, window.state[index]);
+    console.groupEnd();
+    return newState;
 }
 
 // *Hook model node
@@ -68,18 +75,18 @@ function useModelNodeFunction(idNode, idFunction){
     return [modelFunction, setDataInFunctionNode, removeFunctionNode];
 }
 
-function turnLoading(state){
-    if (state.lodingCircle === true) {
+function turnLoading(){
+    if (window.state.lodingCircle === true) {
         $("#loaderTreeContainer").removeClass("d-flex").addClass("d-none");
         $("#displayContainer").css("display","block");
-
-        return changeState(state, "lodingCircle", false);
+        changeState("lodingCircle", false);
+        return false;
 
     } else{
         $("#loaderTreeContainer").removeClass("d-none").addClass("d-flex");
         $("#displayContainer").css("display","none");
-
-        return changeState(state, "lodingCircle", true);
+        changeState(state, "lodingCircle", true)
+        return true;
     }
 }
 
