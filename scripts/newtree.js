@@ -7,14 +7,13 @@ $(document).ready(function() {
 
 
 
-    window.state = turnLoading(window.state);
 
     getDataTree().then((treeData)=>{
         window.state = turnLoading(window.state);
         const treeTool = new TreeModel();
         let dataTree = treeTool.parse(treeData);
         window.state = changeState(window.state, "dataTree", dataTree);
-        //showTree();
+        showTree();
     });
 
 });
@@ -25,6 +24,17 @@ function changeState(state, index, data){
     return {...state, [index]:data}
 }
 
+function useModelNode(id){
+    let node = window.state.dataTree.first({strategy: 'post'}, function (node) {
+        return node.model.id === id;
+    });
+
+    const setDataInNode = (nameModel, data) => {
+        node.model[nameModel] = data
+    }
+
+    return [node, setDataInNode]
+}
 
 function turnLoading(state){
     if (state.lodingCircle === true) {
@@ -43,7 +53,7 @@ function turnLoading(state){
 
 function getDataTree(){
     return new Promise((resolve,reject) => {
-        let testdata = {
+        const testdata = {
             id:0,
             title:"Начало дерева",
             children:[
@@ -143,16 +153,15 @@ function showTree(){
         if(path.length === 2)
         {
             addHTMLBlock($("#tree"),id,title);
-            showListFunct(id,listfunct);
-            
+            //showListFunct(id,listfunct);
         }
-        else if(path.length >= 3)
-        {
-            idparent = node.parent.model.id;
-            showChildBlock(idparent, id, title);
-            connectChildNode(idparent,id);
-            showListFunct(id,listfunct);
-        }
+        // else if(path.length >= 3)
+        // {
+        //     const idparent = node.parent.model.id;
+        //     showChildBlock(idparent, id, title);
+        //     connectChildNode(idparent,id);
+        //     showListFunct(id,listfunct);
+        // }
         
         
 
@@ -160,4 +169,78 @@ function showTree(){
 }
 
 // HTML Manipulation Functions
+
+function addHTMLBlock(el,id,title){
+    
+    const htmlblock=`
+    <div class="block" id="block${id}">
+        <div class="parent">
+            <div class="node">
+                <div class="title">
+                    <div class="text">
+                        ${title}
+                    </div>
+                </div>
+                <div class="tool">
+                    <button class="MyBtn MyBtn-info btn btn-outline-info btn-sm">
+                    Информация
+                    </button>
+                    <button class="MyBtn MyBtn-addchild btn btn-outline-success btn-sm">
+                    Добавить
+                    </button>
+                    <button class="MyBtn MyBtn-addfunct btn btn-outline-success btn-sm">
+                    Добавить Функцию
+                    </button>
+                    
+                    <button class="MyBtn MyBtn-editchild btn btn-outline-warning btn-sm">
+                    Редактировать
+                    </button>
+                    <button class="MyBtn MyBtn-move btn btn-outline-warning btn-sm">
+                    Вырезать
+                    </button>
+                    <button class="MyBtn MyBtn-paste btn btn-primary btn-sm" style="display:none;">
+                    Вставить
+                    </button>
+
+                    <button class="MyBtn MyBtn-remove btn btn-outline-danger btn-sm">
+                    Удалить
+                    </button>
+                </div>
+            </div>
+
+            <div class="list-funct">
+            </div>
+
+        </div>
+
+        <div class="childrens">
+        </div>
+    </div>`;
+
+    let jqEl = $(htmlblock);
+    setListnerOnNodeTool(jqEl, id);
+    el.append(jqEl);
+
+}
+
+function setListnerOnNodeTool(jqNode, idNode){
+   
+    jqNode.find(`.parent .node .tool button`).click(function(){
+        console.log(`Была нажата кнопка ${ $(this).text() } на элементе id:${idNode} `);
+    });
+
+    const button = function(tag){
+        jqNode.find(`.parent .node .tool ${tag}`).first();
+    }
+
+    let [node, setDataInNode] = useModelNode(idNode);
+
+    // button(".MyBtn-info").click(()=>{});
+    // button(".MyBtn-addchild").click(()=>{});
+    // button(".MyBtn-addfunct").click(()=>{});
+    // button(".MyBtn-editchild").click(()=>{});
+    // button(".MyBtn-move").click(()=>{});
+    // button(".MyBtn-paste").click(()=>{});
+    // button(".MyBtn-remove").click(()=>{});
+}
 
