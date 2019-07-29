@@ -179,7 +179,7 @@ function showTree(){
         {
             const idParent = node.parent.model.id;
             showChildBlock($("#tree"), idParent, id, title);
-            //connectChildNode(idparent,id);
+            connectChildNode($("#tree"), idParent, id);
             showListFunct($("#tree"), id, listFunct);
         }
         
@@ -322,5 +322,77 @@ function setListnerOnNodeTool(jqNode, idNode){
     button(".MyBtn-move").click(()=>{});
     button(".MyBtn-paste").click(()=>{});
     button(".MyBtn-remove").click(()=>{});
+}
+
+// SVG Logic Functions
+
+function connectChildNode(jqTree, idParent, idChild){
+    const svg = $("#svg1");
+    createPath(svg,`path${idChild}`);
+
+    const path = $(`#path${idChild}`);
+    const startElem = jqTree.find(`#block${idParent} .parent .node .title`).first();
+    const endElem = jqTree.find(`#block${idChild} .parent .node .title`).first();
+    connectChild(svg, path, startElem, endElem);
+}
+
+function connectChild(svg, path, startElem, endElem) {
+    const svgContainer= svg;
+
+    // if first element is lower than the second, swap!
+    if(startElem.offset().top > endElem.offset().top){
+        let temp = startElem;
+        startElem = endElem;
+        endElem = temp;
+    }
+
+    // get (top, left) corner coordinates of the svg container   
+    const svgTop  = svgContainer.offset().top;
+    const svgLeft = svgContainer.offset().left;
+
+    // get (top, left) coordinates for the two elements
+    const startCoord = startElem.offset();
+    const endCoord   = endElem.offset();
+
+    // calculate path's start (x,y)  coords
+    // we want the x coordinate to visually result in the element's mid point
+    const startX = startCoord.left + 0.5*startElem.outerWidth() - svgLeft;    // x = left offset + 0.5*width - svg's left offset
+    const startY = startCoord.top  + startElem.outerHeight() - svgTop;        // y = top offset + height - svg's top offset
+
+        // calculate path's end (x,y) coords
+    const endX = endCoord.left  - svgLeft;
+    const endY = endCoord.top + 0.5*startElem.outerHeight() - svgTop;
+
+    // call function for drawing the path
+    drawPath(svg, path, startX, startY, endX, endY);
+
+}
+
+// SVG Manipulation Functions
+
+function createPath(svg, id){
+    
+    let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("id", id);
+    path.setAttribute("d", "M0 0");
+    path.setAttribute("stroke", "#000");
+    path.setAttribute("fill", "none");
+    path.setAttribute("stroke-width", "3px");
+    document.getElementById("svg1").appendChild(path);
+}
+
+function drawPath(svg, path, startX, startY, endX, endY) {
+    // get the path's stroke width (if one wanted to be  really precize, one could use half the stroke size)
+    const stroke =  parseFloat(path.attr("stroke-width"));
+    
+    // check if the svg is big enough to draw the path, if not, set heigh/width
+    if (svg.attr("height") <  endY)                 svg.attr("height", endY + stroke);
+    if (svg.attr("width" ) < (startX + stroke) )    svg.attr("width", (startX + stroke));
+    if (svg.attr("width" ) < (endX   + stroke) )    svg.attr("width", (endX   + stroke));
+    
+    path.attr("d", `M ${startX},${startY} 
+    l 0,${endY-startY-15} 
+    q 0,15 15,15
+    l ${endX-startX-15},0`);
 }
 
