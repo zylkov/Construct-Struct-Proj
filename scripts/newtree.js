@@ -230,17 +230,17 @@ function setListnerOnNodeTool(jqNode, idNode){
     });
 
     const button = function(tag){
-        jqNode.find(`.parent .node .tool ${tag}`).first();
+        return jqNode.find(`.parent .node .tool ${tag}`).first();
     }
 
     let [node, setDataInNode] = useModelNode(idNode);
 
-    // button(".MyBtn-info").click(()=>{});
-    // button(".MyBtn-addchild").click(()=>{});
-    // button(".MyBtn-addfunct").click(()=>{});
-    // button(".MyBtn-editchild").click(()=>{});
-    // button(".MyBtn-move").click(()=>{});
-    // button(".MyBtn-paste").click(()=>{});
-    // button(".MyBtn-remove").click(()=>{});
+    button(".MyBtn-info").click(()=>{});
+    button(".MyBtn-addchild").click(()=>{});
+    button(".MyBtn-addfunct").click(()=>{});
+    button(".MyBtn-editchild").click(()=>{});
+    button(".MyBtn-move").click(()=>{});
+    button(".MyBtn-paste").click(()=>{});
+    button(".MyBtn-remove").click(()=>{});
 }
 
