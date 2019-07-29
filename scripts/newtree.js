@@ -20,20 +20,52 @@ $(document).ready(function() {
 
 
 // State Functions
+
 function changeState(state, index, data){
     return {...state, [index]:data}
 }
 
+// *Hook model node
 function useModelNode(id){
     let node = window.state.dataTree.first({strategy: 'post'}, function (node) {
         return node.model.id === id;
     });
 
     const setDataInNode = (nameModel, data) => {
-        node.model[nameModel] = data
+        console.group(`Change Node id ${id}`);
+        console.log(`Model: ${nameModel}`);
+        console.log(`Past data:`, node.model[nameModel]);
+        node.model[nameModel] = data;
+        console.log(`Current data:`, node.model[nameModel]);
+        console.groupEnd();
     }
 
-    return [node, setDataInNode]
+    return [node.model, setDataInNode];
+}
+
+// *Hook model node function
+function useModelNodeFunction(idNode, idFunction){
+    let node = window.state.dataTree.first({strategy: 'post'}, function (node) {
+        return node.model.id === idNode;
+    });
+
+    const objIndex = node.model.listfunct.findIndex((obj => obj.id === idFunction));
+    
+    let modelFunction = node.model.listfunct[objIndex];
+    const setDataInFunctionNode = (nameModel, data) => {
+        console.group(`Change Function id ${idFunction} Node ${idNode}`);
+        console.log(`Model: ${nameModel}`);
+        console.log(`Past data:`, node.model.listfunct[objIndex][nameModel]);
+        node.model.listfunct[objIndex][nameModel] = data;
+        console.log(`Current data:`, node.model.listfunct[objIndex][nameModel]);
+        console.groupEnd();
+    }
+    const removeFunctionNode = () => {
+        console.log(`Remove Function id ${idFunction} Node ${idNode}`);
+        node.model.listfunct = node.model.listfunct.filter(funct => funct.id !== idFunction);
+    }
+
+    return [modelFunction, setDataInFunctionNode, removeFunctionNode];
 }
 
 function turnLoading(state){
@@ -156,7 +188,7 @@ function getDataTree(){
     });
 }
 
-// Logick Functions
+// Logic Functions
 
 function showTree(){
     
@@ -235,6 +267,8 @@ function addHTMLFunct(jqNode, idNode, id, title){
     
 }
 
+ 
+
 function setListnerOnFunctionTool(jqFuctional, idFuctional, idNode){
    
     jqFuctional.find(`.tool button`).click(function(){
@@ -245,9 +279,65 @@ function setListnerOnFunctionTool(jqFuctional, idFuctional, idNode){
         return jqFuctional.find(`.tool ${tag}`).first();
     }
 
-    button(".MyBtn-info").click(()=>{});
-    button(".MyBtn-edit").click(()=>{});
-    button(".MyBtn-remove").click(()=>{});
+    let [functModel, setFunctModel, removeFunctionNode] = useModelNodeFunction(idNode, idFuctional);
+   
+
+    button(".MyBtn-info").click(()=>{
+        const callbackReadyInfo = (modals) => {
+            let discriptionFormControlTextarea = modals.find("#discriptionFormControlTextarea");
+            let typeFunctionFormControlSelect = modals.find("#typeFunctionFormControlSelect");
+            let buttonSaveChange = modals.find(".mybtn-savechange");
+            
+            discriptionFormControlTextarea.val("");
+            discriptionFormControlTextarea.val(functModel.discription);
+            
+            typeFunctionFormControlSelect.val(functModel.type);
+            if(functModel.type === "single" || functModel.type === "discription")
+                $("#functionInfoModal #functionInfoModalStruct").addClass("d-none")
+            else
+                $("#functionInfoModal #functionInfoModalStruct").removeClass("d-none");
+            
+            buttonSaveChange.click(()=>{
+                setFunctModel("discription", discriptionFormControlTextarea.val());
+                setFunctModel("type", typeFunctionFormControlSelect.val());
+                buttonSaveChange.off();
+                modals.modal('hide');
+            });
+
+            modals.on('hide.bs.modal', () => {
+                buttonSaveChange.off();
+                modals.off("hide.bs.modal");   
+            });
+        }
+
+        openModal("functionInfoModal", callbackReadyInfo);
+
+    });
+
+    button(".MyBtn-edit").click(()=>{
+        const callchangeTitle = (newTitle) => {
+            setFunctModel("title", newTitle);
+            jqFuctional.find(".title .text").text(newTitle);
+        }
+
+        promptModal("Новое название функции",
+        "Введите новое название функции", 
+        functModel.title, callchangeTitle);
+    });
+    
+    button(".MyBtn-remove").click(()=>{
+        const callRemoveFunction = (result) => {
+            if(result){
+                removeFunctionNode();
+                jqFuctional.remove();
+            }
+        }
+        
+        confirmModal("Удаление функции",
+        `Вы точно хотите удалить функцию id ${idFuctional} блока id ${idNode}`, 
+        callRemoveFunction);
+
+    });
 }
 
 function addHTMLBlock(jqParent, idNode, titleNode){
