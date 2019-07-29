@@ -163,7 +163,7 @@ function showTree(){
     window.state.dataTree.walk(function(node){
         const id = node.model.id;
         const title = node.model.title;
-        const listfunct = node.model.listfunct;
+        const listFunct = node.model.listfunct;
 
         console.log(`Имя : ${title}`);
         
@@ -173,15 +173,15 @@ function showTree(){
         if(path.length === 2)
         {
             addHTMLBlock($("#tree"), id, title);
-            showListFunct($("#tree"), id, listfunct);
+            showListFunct($("#tree"), id, listFunct);
         }
-        // else if(path.length >= 3)
-        // {
-        //     const idparent = node.parent.model.id;
-        //     showChildBlock(idparent, id, title);
-        //     connectChildNode(idparent,id);
-        //     showListFunct(id,listfunct);
-        // }
+        else if(path.length >= 3)
+        {
+            const idParent = node.parent.model.id;
+            showChildBlock($("#tree"), idParent, id, title);
+            //connectChildNode(idparent,id);
+            showListFunct($("#tree"), id, listFunct);
+        }
         
         
 
@@ -189,11 +189,16 @@ function showTree(){
 }
 
 function showListFunct (jqTree, idNode, listFuncts){
-    jqNode = jqTree.find(`#block${idNode} .parent .list-funct `).first();
+    const jqNode = jqTree.find(`#block${idNode} .parent .list-funct `).first();
     
     listFuncts.forEach(function(elementFunct) {
         addHTMLFunct(jqNode, idNode, elementFunct.id, elementFunct.title);
     });
+}
+
+function showChildBlock(jqTree, idParent, id, title){
+    const jqParent = jqTree.find(`#block${idParent} .childrens `).first();
+    addHTMLBlock(jqParent, id, title);
 }
 
 // HTML Manipulation Functions
@@ -245,7 +250,7 @@ function setListnerOnFunctionTool(jqFuctional, idFuctional, idNode){
     button(".MyBtn-remove").click(()=>{});
 }
 
-function addHTMLBlock(jqTree, idNode, titleNode){
+function addHTMLBlock(jqParent, idNode, titleNode){
     
     const htmlBlock=`
     <div class="block" id="block${idNode}">
@@ -294,7 +299,7 @@ function addHTMLBlock(jqTree, idNode, titleNode){
 
     let jqEl = $(htmlBlock);
     setListnerOnNodeTool(jqEl, idNode);
-    jqTree.append(jqEl);
+    jqParent.append(jqEl);
 
 }
 
