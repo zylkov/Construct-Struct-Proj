@@ -306,7 +306,7 @@ function setListnerOnFunctionTool(jqFuctional, idFuctional, idNode){
             discriptionFormControlTextarea.val(functModel.discription);
             
             typeFunctionFormControlSelect.val(functModel.type);
-            if(functModel.type === "single" || functModel.type === "discription")
+            if(functModel.type === "single" || functModel.type === "discription") // не меняеться тип
                 $("#functionInfoModal #functionInfoModalStruct").addClass("d-none")
             else
                 $("#functionInfoModal #functionInfoModalStruct").removeClass("d-none");
@@ -446,14 +446,22 @@ function setListnerOnNodeTool(jqNode, idNode){
         const callbackAddFunct = (result) => {
             newFunct = {id:getRandomInt(10,100), title:result, discription:"", type: "single"};
             setDataInNode("listfunct",[...node.listfunct, newFunct]);
-            showBlockFunct(idNode,newFunct.id,newFunct.title);
+            showBlockFunct(idNode,newFunct.id,newFunct.title); // mb remove
         }
 
         promptModal("Создание нового функции",
         `Введите название новой функции функционального блока "${node.title}" `,
         "Новая функция", callbackAddFunct);
     });
-    button(".MyBtn-editchild").click(()=>{});
+    button(".MyBtn-editchild").click(()=>{
+        const callbackEditNode = (result) => {
+            setDataInNode("title",result);
+            let title = jqNode.find(".parent .node .title .text").first();
+            title.text(node.title);
+        }
+
+        promptModal("Новое название функционального блока", "Введите новое название функционального блока", node.title, callbackEditNode);
+    });
     button(".MyBtn-move").click(()=>{});
     button(".MyBtn-paste").click(()=>{});
     button(".MyBtn-remove").click(()=>{});
