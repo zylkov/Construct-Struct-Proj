@@ -412,7 +412,28 @@ function setListnerOnNodeTool(jqNode, idNode){
 
     let [node, setDataInNode] = useModelNode(idNode); // cheack function 
 
-    button(".MyBtn-info").click(()=>{});
+    button(".MyBtn-info").click(()=>{
+        const callbackReadyInfo = (modals) => {
+            modals.find("#nodeInfoModalTitle").text(node.title);
+            let discriptionFormControlTextarea = modals.find("#discriptionFormControlTextarea");
+            let buttonSaveChange = modals.find(".mybtn-savechange");
+            discriptionFormControlTextarea.val("");
+            discriptionFormControlTextarea.val(node.discription);
+
+            buttonSaveChange.click(()=>{
+                setDataInNode("discription",discriptionFormControlTextarea.val());
+                buttonSaveChange.off();
+                modals.modal('hide');
+            });
+
+            modals.on('hide.bs.modal', () => {
+                buttonSaveChange.off();
+                modals.off("hide.bs.modal");   
+            });
+        }
+
+        openModal("nodeInfoModal", callbackReadyInfo);
+    });
     button(".MyBtn-addchild").click(()=>{});
     button(".MyBtn-addfunct").click(()=>{});
     button(".MyBtn-editchild").click(()=>{});
