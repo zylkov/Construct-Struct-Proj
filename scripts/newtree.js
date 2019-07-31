@@ -235,10 +235,17 @@ function showListFunct (jqTree, idNode, listFuncts){
     });
 }
 
+function showBlockFunct(idNode, id, title){
+    const jqNode = $(`#block${idNode} .parent .list-funct `).first();
+    addHTMLFunct(jqNode, idNode, id, title);
+}
+
 function showChildBlock(jqTree, idParent, id, title){
     const jqParent = jqTree.find(`#block${idParent} .childrens `).first();
     addHTMLBlock(jqParent, id, title);
 }
+
+
 
 // HTML Manipulation Functions
 
@@ -435,7 +442,17 @@ function setListnerOnNodeTool(jqNode, idNode){
         openModal("nodeInfoModal", callbackReadyInfo);
     });
     button(".MyBtn-addchild").click(()=>{});
-    button(".MyBtn-addfunct").click(()=>{});
+    button(".MyBtn-addfunct").click(()=>{
+        const callbackAddFunct = (result) => {
+            newFunct = {id:getRandomInt(10,100), title:result, discription:"", type: "single"};
+            setDataInNode("listfunct",[...node.listfunct, newFunct]);
+            showBlockFunct(idNode,newFunct.id,newFunct.title);
+        }
+
+        promptModal("Создание нового функции",
+        `Введите название новой функции функционального блока "${node.title}" `,
+        "Новая функция", callbackAddFunct);
+    });
     button(".MyBtn-editchild").click(()=>{});
     button(".MyBtn-move").click(()=>{});
     button(".MyBtn-paste").click(()=>{});
