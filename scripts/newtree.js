@@ -32,6 +32,27 @@ function changeState(index, data){
     return newState;
 }
 
+function addChildNode(idParent, dataNewNode){
+    const treeTool = new TreeModel();
+    const newNode = treeTool.parse(dataNewNode);
+    
+    console.group(`Change Node id${idParent} children`);
+    const nodeParent = getNode(idParent);
+    console.log(`Past data:`, nodeParent.children);
+    nodeParent.addChild(newNode);
+    console.log(`Current data:`, nodeParent.children);
+    console.groupEnd();
+    return true;
+
+}
+
+function getNode(id){
+    return window.state.dataTree.first({strategy: 'post'}, function (node) {
+        return node.model.id === id;
+    });
+    
+}
+
 // *Hook model node
 function useModelNode(id){
     let node = window.state.dataTree.first({strategy: 'post'}, function (node) {
@@ -417,7 +438,11 @@ function setListnerOnNodeTool(jqNode, idNode){
         return jqNode.find(`.parent .node .tool ${tag}`).first();
     }
 
-    let [node, setDataInNode] = useModelNode(idNode); // cheack function 
+    const addHTMLBlockChild = (id, title) => {
+        addHTMLBlock(jqNode.find(".childrens").first(), id, title);
+    }
+
+    let [node, setDataInNode] = useModelNode(idNode); 
 
     button(".MyBtn-info").click(()=>{
         const callbackReadyInfo = (modals) => {
@@ -441,7 +466,20 @@ function setListnerOnNodeTool(jqNode, idNode){
 
         openModal("nodeInfoModal", callbackReadyInfo);
     });
-    button(".MyBtn-addchild").click(()=>{});
+    button(".MyBtn-addchild").click(()=>{
+        const callbackAddChild = (result) => {
+            newdata = {id:getRandomInt(10,100), title:result, discription:"", listfunct:[]};
+            
+            addChildNode(idNode, newdata);
+            addHTMLBlockChild(newdata.id, result);
+            connectChildNode($("#tree"), idNode, newdata.id);
+            updatePath();
+        };
+
+        promptModal("Создание нового функционального блока",
+        `Введите название нового функционального блока зависимового от блока "${node.title}" `,
+        "Новый блок", callbackAddChild);
+    });
     button(".MyBtn-addfunct").click(()=>{
         const callbackAddFunct = (result) => {
             newFunct = {id:getRandomInt(10,100), title:result, discription:"", type: "single"};
@@ -468,6 +506,23 @@ function setListnerOnNodeTool(jqNode, idNode){
 }
 
 // SVG Logic Functions
+function updatePath(){
+    window.state.dataTree.walk((node)=>{
+        const path = node.getPath();
+
+        if(path.length >= 3){
+            const idChild = node.model.id;
+            const idParent = node.parent.model.id;
+            const svg = $("#svg1");
+            const path = $(`#path${idChild}`);
+
+            const startElem = $(`#block${idParent} .parent .node .title`).first();
+            const endElem = $(`#block${idChild} .parent .node .title`).first();
+            connectChild(svg, path, startElem, endElem);
+        }
+    });
+}
+
 
 function connectChildNode(jqTree, idParent, idChild){
     const svg = $("#svg1");
