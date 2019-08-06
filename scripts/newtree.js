@@ -53,6 +53,18 @@ function getNode(id){
     
 }
 
+function getParentNode(id){
+    return getNode(id).parent
+}
+
+function removeNode(id){
+    const node = getNode(id);
+    node.drop();
+    console.log(`Remove node id${id}`);
+    
+    return true;
+}
+
 // *Hook model node
 function useModelNode(id){
     let node = window.state.dataTree.first({strategy: 'post'}, function (node) {
@@ -244,6 +256,37 @@ function showTree(){
         }
         
         
+
+    });
+}
+
+function showPartTree(idParent, childrens){
+    console.log("Test data:",[idParent, childrens]);
+    console.group(`show part tree in node id${idParent}`);
+    childrens.forEach((child)=>{
+        const id = child.id;
+        const title = child.title;
+        const listFunct = child.listfunct;
+        const nodeChild = getNode(id);
+        const path = nodeChild.getPath();
+        console.log(`Node id${id} path:`,path);
+        console.groupEnd();
+
+        if(path.length === 2)
+        {
+            addHTMLBlock($("#tree"), id, title);
+            showListFunct($("#tree"), id, listFunct);
+        }
+        else if(path.length >= 3)
+        {
+            const idParentBlock = nodeChild.parent.model.id;
+            showChildBlock($("#tree"), idParentBlock, id, title);
+            connectChildNode($("#tree"), idParentBlock, id);
+            showListFunct($("#tree"), id, listFunct);
+        }
+
+        if(nodeChild.children.length > 0)
+            showPartTree(id, nodeChild.model.children);
 
     });
 }
@@ -442,6 +485,15 @@ function setListnerOnNodeTool(jqNode, idNode){
         addHTMLBlock(jqNode.find(".childrens").first(), id, title);
     }
 
+    const removeConnectChildNodes = (childrens) => {
+        childrens.forEach((child)=>{
+            removeConnect(child.id);
+            if(child.children.length > 0)
+                removeConnectChildNodes(child.children);
+        });
+    }
+
+
     let [node, setDataInNode] = useModelNode(idNode); 
 
     button(".MyBtn-info").click(()=>{
@@ -468,7 +520,7 @@ function setListnerOnNodeTool(jqNode, idNode){
     });
     button(".MyBtn-addchild").click(()=>{
         const callbackAddChild = (result) => {
-            newdata = {id:getRandomInt(10,100), title:result, discription:"", listfunct:[]};
+            newdata = {id:getRandomInt(10,100), title:result, discription:"", listfunct:[], children:[]};
             
             addChildNode(idNode, newdata);
             addHTMLBlockChild(newdata.id, result);
@@ -502,10 +554,59 @@ function setListnerOnNodeTool(jqNode, idNode){
     });
     button(".MyBtn-move").click(()=>{});
     button(".MyBtn-paste").click(()=>{});
-    button(".MyBtn-remove").click(()=>{});
+    button(".MyBtn-remove").click(()=>{
+        const childrens = node.children;
+        const parentNode = getParentNode(idNode);
+        const callRemoveNode = (result) => {
+            if(result){
+                result = false;
+                if(childrens.length > 0){
+                    result = true;
+
+                    childrens.forEach((child)=>{
+                        jqNode.find(`.childrens #block${child.id}`).remove();
+                        
+                    });
+                    removeConnectChildNodes(childrens);
+                }
+                removeConnect(idNode);
+                jqNode.remove();
+                removeNode(idNode);
+
+                updatePath();
+                return result;
+            }
+            return result;
+        }
+
+        const callRemoveChildNode = (on) => {
+            if(on){
+                childrens.forEach((node)=>{
+
+                    addChildNode(parentNode.model.id, node);
+                });
+                showPartTree(parentNode.model.id, childrens);
+                updatePath();
+            }
+        }
+
+        confirmModal("Удаление функционального блока",`Вы точно хотите удалить функциональный блок ${node.title}`,
+        callRemoveNode).then((result)=>{
+            if(result)
+                confirmModal("Удаление функционального блока",`Вы хотите оставить дочерние объекты функционального блока?`,
+                callRemoveChildNode);
+        });
+
+       
+    });
 }
 
 // SVG Logic Functions
+function removeConnect(idNode){
+    $(`#path${idNode}`).remove();
+}
+
+
 function updatePath(){
     window.state.dataTree.walk((node)=>{
         const path = node.getPath();
