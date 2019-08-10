@@ -3,6 +3,7 @@ $(document).ready(function() {
     window.state = {
         lodingCircle:true,
         dataTree:{},
+        movingNode:null
     };
 
 
@@ -471,6 +472,13 @@ function addHTMLBlock(jqParent, idNode, titleNode){
 
 }
 
+function getIdNode(jqblockchild){
+    parent = jqblockchild.parents(".block").eq(0);
+    idparent = parent.attr("id");
+    id = parseInt(idparent.replace("block",""));
+    return id
+}
+
 function setListnerOnNodeTool(jqNode, idNode){
    
     jqNode.find(`.parent .node .tool button`).click(function(){
@@ -552,7 +560,76 @@ function setListnerOnNodeTool(jqNode, idNode){
 
         promptModal("Новое название функционального блока", "Введите новое название функционального блока", node.title, callbackEditNode);
     });
-    button(".MyBtn-move").click(()=>{});
+    button(".MyBtn-move").click(()=>{
+        $(`#block${idNode} .node .title`).css("border-color","#ffc107");
+        $(`#block${idNode} .node .title`).css("background-color","#fff9e9");
+        
+        const allButton = $('.block .parent .node .tool .MyBtn')
+        allButton.prop("disabled",true);
+        allButton.addClass("d-none");
+
+        const buttonPaste = $(`.block .node`).not($(`#block${idNode} .node`)).find(".MyBtn-paste");
+        buttonPaste.removeClass("d-none");
+        buttonPaste.prop("disabled",false);
+        buttonPaste.css("display","block");
+
+        const buttonMoveToStart = $("#mybtn-movetostart");
+        buttonMoveToStart.removeClass("d-none");
+
+        updatePath();
+        changeState("movingNode", getNode(idNode));
+        //*
+        buttonPaste.click(function(){
+            const idContanire = getIdNode($(this));
+            const node = window.state.movingNode.model;
+            const idNode = window.state.movingNode.model.id;
+
+            removeConnectChildNodes([node]);
+            $(`#block${idNode}`).remove();
+            removeNode(idNode);
+            addChildNode(idContanire, node);
+            
+            nodeChild = getNode(idNode);
+            
+            showPartTree(nodeChild.parent.model.id, [node]);
+
+            changeState("movingNode",null);
+            
+            buttonPaste.off("click");
+            buttonMoveToStart.off("click");
+            buttonPaste.css("display","none");
+            allButton.prop("disabled",false);
+            allButton.removeClass("d-none");
+            buttonMoveToStart.addClass("d-none");
+            updatePath();
+        });
+
+        buttonMoveToStart.click(function(){
+            const idContanire = 0;
+            const node = window.state.movingNode.model;
+            const idNode = window.state.movingNode.model.id;
+            
+            removeConnectChildNodes([node]);
+            $(`#block${idNode}`).remove();
+            removeNode(idNode);
+            addChildNode(idContanire, node);
+            
+            nodeChild = getNode(idNode);
+            
+            showPartTree(nodeChild.parent.model.id, [node]);
+
+            changeState("movingNode",null);
+            
+            buttonMoveToStart.off("click");
+            buttonPaste.off("click");
+            buttonPaste.css("display","none");
+            allButton.prop("disabled",false);
+            allButton.removeClass("d-none");
+            buttonMoveToStart.addClass("d-none");
+            updatePath(); 
+        });
+
+    });
     button(".MyBtn-paste").click(()=>{});
     button(".MyBtn-remove").click(()=>{
         const childrens = node.children;
