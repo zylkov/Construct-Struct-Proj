@@ -73,12 +73,12 @@ $(document).ready(function() {
         {
             id:2,
             title:"Проект2",
-            discription:"Это проект dsdsds"
+            discription:"Это другой проект"
         },
         {
             id:3,
             title:"Проект3",
-            discription:"Это пfsfseewefwfewfewf"
+            discription:"Это иной проект"
         }
     ];
 
