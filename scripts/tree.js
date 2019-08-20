@@ -1,402 +1,132 @@
-//helper functions, it turned out chrome doesn't support Math.sgn() 
-function signum(x) {
-    return (x < 0) ? -1 : 1;
-}
-function absolute(x) {
-    return (x < 0) ? -x : x;
-}
+//start point 
+$(document).ready(function() {
+    window.state = {
+        lodingCircle:true,
+        dataTree:{},
+        movingNode:null
+    };
 
 
-function drawPath(svg, path, startX, startY, endX, endY) {
-    // get the path's stroke width (if one wanted to be  really precize, one could use half the stroke size)
-    var stroke =  parseFloat(path.attr("stroke-width"));
-    
-    // check if the svg is big enough to draw the path, if not, set heigh/width
-    if (svg.attr("height") <  endY)                 svg.attr("height", endY + stroke);
-    if (svg.attr("width" ) < (startX + stroke) )    svg.attr("width", (startX + stroke));
-    if (svg.attr("width" ) < (endX   + stroke) )    svg.attr("width", (endX   + stroke));
-    
-    path.attr("d", `M ${startX},${startY} 
-    l 0,${endY-startY-15} 
-    q 0,15 15,15
-    l ${endX-startX-15},0`);
-}
 
-function connectElements(svg, path, startElem, endElem) {
-    var svgContainer= $("#svgContainer");
 
-    // if first element is lower than the second, swap!
-    if(startElem.offset().top > endElem.offset().top){
-        var temp = startElem;
-        startElem = endElem;
-        endElem = temp;
-    }
-
-    // get (top, left) corner coordinates of the svg container   
-    var svgTop  = svgContainer.offset().top;
-    var svgLeft = svgContainer.offset().left;
-
-    // get (top, left) coordinates for the two elements
-    var startCoord = startElem.offset();
-    var endCoord   = endElem.offset();
-
-    // calculate path's start (x,y)  coords
-    // we want the x coordinate to visually result in the element's mid point
-    var startX = startCoord.left + 0.5*startElem.outerWidth() - svgLeft;    // x = left offset + 0.5*width - svg's left offset
-    var startY = startCoord.top  + startElem.outerHeight() - svgTop;        // y = top offset + height - svg's top offset
-
-        // calculate path's end (x,y) coords
-    var endX = endCoord.left + 0.5*endElem.outerWidth() - svgLeft;
-    var endY = endCoord.top  - svgTop;
-
-    // call function for drawing the path
-    drawPath(svg, path, startX, startY, endX, endY);
-
-}
-
-function connectChild(svg, path, startElem, endElem) {
-    var svgContainer= svg;
-
-    // if first element is lower than the second, swap!
-    if(startElem.offset().top > endElem.offset().top){
-        var temp = startElem;
-        startElem = endElem;
-        endElem = temp;
-    }
-
-    // get (top, left) corner coordinates of the svg container   
-    var svgTop  = svgContainer.offset().top;
-    var svgLeft = svgContainer.offset().left;
-
-    // get (top, left) coordinates for the two elements
-    var startCoord = startElem.offset();
-    var endCoord   = endElem.offset();
-
-    // calculate path's start (x,y)  coords
-    // we want the x coordinate to visually result in the element's mid point
-    var startX = startCoord.left + 0.5*startElem.outerWidth() - svgLeft;    // x = left offset + 0.5*width - svg's left offset
-    var startY = startCoord.top  + startElem.outerHeight() - svgTop;        // y = top offset + height - svg's top offset
-
-        // calculate path's end (x,y) coords
-    var endX = endCoord.left  - svgLeft;
-    var endY = endCoord.top + 0.5*startElem.outerHeight() - svgTop;
-
-    // call function for drawing the path
-    drawPath(svg, path, startX, startY, endX, endY);
-
-}
-
-function createPath(svg, id){
-    
-    path = document.createElementNS("http://www.w3.org/2000/svg","path");
-    path.setAttribute("id",id);
-    path.setAttribute("d","M0 0");
-    path.setAttribute("stroke","#000");
-    path.setAttribute("fill","none");
-    path.setAttribute("stroke-width","3px");
-    document.getElementById("svg1").appendChild(path);
-}
-
-function connectChildNode(idparent, idchild){
-    svg = $("#svg1");
-    createPath(svg,`path${idchild}`);
-    path=$(`#path${idchild}`);
-    
-    startElem = $(`#block${idparent} .parent .node .title`).first();
-    
-    endElem = $(`#block${idchild} .parent .node .title`).first();
-   
-    connectChild(svg, path, startElem, endElem);
-}
-
-function removeConnectNode(idchild){
-    path=$(`#path${idchild}`);
-    path.remove();
-}
-
-function removeConnectChildNodes(tree, root, childrens){ 
-    childrens.forEach(function(node){
-        removeConnectNode(node.model.id);
-        nodeChildren = getChildrensNode(tree, root, node.model.id);
-
-        if(nodeChildren.length > 0)
-            removeConnectChildNodes(tree, root, nodeChildren);
+    getDataTree().then((treeData)=>{
+        turnLoading();
+        const treeTool = new TreeModel();
+        let dataTree = treeTool.parse(treeData);
+        changeState("dataTree", dataTree);
+        showTree();
     });
+
+});
+
+
+// State Functions
+
+function changeState(index, data){
+    const newState = {...window.state, [index]:data};
+    console.group(`Change State`);
+    console.log(`Model: ${index}`);
+    console.log(`Past data:`, window.state[index]);
+    window.state = newState;
+    console.log(`Current data:`, window.state[index]);
+    console.groupEnd();
+    return newState;
 }
 
-function updateConnectChildNode(idparent, idchild){
-    svg = $("#svg1");
-    path=$(`#path${idchild}`);
-
-    startElem = $(`#block${idparent} .parent .node .title`).first();
-    endElem = $(`#block${idchild} .parent .node .title`).first();
-    connectChild(svg, path, startElem, endElem);
-}
-
-function addHTMLBlock(el,id,title){
+function addChildNode(idParent, dataNewNode){
+    const treeTool = new TreeModel();
+    const newNode = treeTool.parse(dataNewNode);
     
-    htmlblock=`
-    <div class="block" id="block${id}">
-        <div class="parent">
-            <div class="node">
-                <div class="title">
-                    <div class="text">
-                        ${title}
-                    </div>
-                </div>
-                <div class="tool">
-                    <button class="MyBtn MyBtn-info btn btn-outline-info btn-sm">
-                    Информация
-                    </button>
-                    <button class="MyBtn MyBtn-addchild btn btn-outline-success btn-sm">
-                    Добавить
-                    </button>
-                    <button class="MyBtn MyBtn-addfunct btn btn-outline-success btn-sm">
-                    Добавить Функцию
-                    </button>
-                    
-                    <button class="MyBtn MyBtn-editchild btn btn-outline-warning btn-sm">
-                    Редактировать
-                    </button>
-                    <button class="MyBtn MyBtn-move btn btn-outline-warning btn-sm">
-                    Вырезать
-                    </button>
-                    <button class="MyBtn MyBtn-paste btn btn-primary btn-sm" style="display:none;">
-                    Вставить
-                    </button>
-
-                    <button class="MyBtn MyBtn-remove btn btn-outline-danger btn-sm">
-                    Удалить
-                    </button>
-                </div>
-            </div>
-
-            <div class="list-funct">
-            </div>
-
-        </div>
-
-        <div class="childrens">
-        </div>
-    </div>`;
-    
-    el.append(htmlblock);
-
-}
-
-function showChildBlock(idparent,id,title){
-    parent = $(`#block${idparent} .childrens `).first();
-    addHTMLBlock(parent,id,title);
-}
-
-function showChangeTitleBlock(id, title){
-    block = $(`#block${id} .parent .node .title .text`).first();
-    block.text(title);
-}
-
-function removeBlock (id){
-    block = $(`#block${id}`);
-    block.remove();
-}
-
-
-function addHTMLFunct(el,id,title){
-    htmlblock=`
-    <div class="funct" id="funct${id}">
-
-              <div class="title">
-                <div class="text">
-                  ${title}
-                </div>
-              </div>
-
-              <div class="tool">
-                <button class="MyBtn MyBtn-info btn btn-outline-info btn-sm" >
-                 Информация
-                </button>
-                
-                <button class="MyBtn MyBtn-edit btn btn-outline-warning btn-sm">
-                 Редактировать
-                </button>
-
-                <button class="MyBtn MyBtn-remove btn btn-outline-danger btn-sm">
-                 Удалить
-                </button>
-              </div>
-
-    </div>`;
-    el.append(htmlblock);
-    
-}
-
-function showListFunct (idel, listfuncts){
-    el = $(`#block${idel} .parent .list-funct `).first();
-    
-    listfuncts.forEach(function(element) {
-        
-        addHTMLFunct(el, element.id, element.title);
-    });
-}
-
-function showBlockFunct(idblock, id, title){
-    el = $(`#block${idblock} .parent .list-funct `).first();
-    addHTMLFunct(el, id, title);
-
-}
-
-function getBlockFunct(idblock, id){
-    return $(`#block${idblock} .parent .list-funct `).find(`#funct${id}`).first();
-}
-
-function removeBlockFunct(idblock, id){
-    el = getBlockFunct(idblock, id);
-    el.remove();
-}
-
-function showChangeTitleBlockFunct(idblock, id, title){
-    block = getBlockFunct(idblock, id);
-    block =  block.find(".title .text");
-    block.text(title);
-}
-
-function showTree(tree){
-    
-    tree.walk(function(node){
-        id = node.model.id;
-        title = node.model.title;
-        listfunct = node.model.listfunct;
-
-        console.log(`Имя : ${title}`);
-        
-        path = node.getPath();
-        console.log(`Путь : `,path);
-        
-        if(path.length === 2)
-        {
-            addHTMLBlock($("#tree"),id,title);
-            showListFunct(id,listfunct);
-            
-        }
-        else if(path.length >= 3)
-        {
-            idparent = node.parent.model.id;
-            showChildBlock(idparent, id, title);
-            connectChildNode(idparent,id);
-            showListFunct(id,listfunct);
-        }
-        
-        
-
-    });
-}
-
-function showPartTree(childrens, parentNode){
-    childrens.forEach(function(node){
-        id = node.model.id;
-        title = node.model.title;
-        listfunct = node.model.listfunct;
-        path = parentNode.getPath(); 
-
-        
-        if(path.length === 1){
-            addHTMLBlock($("#tree"),id,title);
-            showListFunct(id,listfunct);
-        }
-        else{
-            showChildBlock(parentNode.model.id, id, title);
-            showListFunct(id,listfunct);
-            connectChildNode(parentNode.model.id, id);
-        }
-        
-        if(node.children.length > 0)
-            showPartTree(node.children, node);
-    });
-}
-
-function updatePath(tree){
-    
-    tree.walk(function(node){
-        path = node.getPath();
-        
-        if(path.length >= 3){
-            id = node.model.id;
-            idparent = node.parent.model.id;
-            updateConnectChildNode(idparent,id);
-        }
-    });
-}
-
-function getNode(root,id){
-    return root.first({strategy: 'post'}, function (node) {
-        return node.model.id === id;
-    });
-}
-
-function addChildNode(tree,root,idparent,id,title, discription ="" ,children=[],listfunct=[]){
-    
-
-    node = tree.parse({id,title,children,listfunct,discription});
-    nodeparent = getNode(root,idparent);
-
-    nodeparent.addChild(node);
+    console.group(`Change Node id${idParent} children`);
+    const nodeParent = getNode(idParent);
+    console.log(`Past data:`, nodeParent.children);
+    nodeParent.addChild(newNode);
+    console.log(`Current data:`, nodeParent.children);
+    console.groupEnd();
     return true;
+
 }
 
-function getChildrensNode(tree, root, id){
-    node = getNode(root,id);
-    return node.children;
-}
-
-function getParentNode(tree, root, id){
-    node = getNode(root,id);
-    return node.parent;
-}
-
-function removeNode(tree, root, id){
-    
-    node = root.first({strategy: 'post'}, function (node) {
+function getNode(id){
+    return window.state.dataTree.first({strategy: 'post'}, function (node) {
         return node.model.id === id;
     });
     
+}
+
+function getParentNode(id){
+    return getNode(id).parent
+}
+
+function removeNode(id){
+    const node = getNode(id);
     node.drop();
-
+    console.log(`Remove node id${id}`);
+    
     return true;
 }
 
-var ID = function () {
-    // Math.random should be unique because of its seeding algorithm.
-    // Convert it to base 36 (numbers + letters), and grab the first 9 characters
-    // after the decimal.
-    return '_' + Math.random().toString(36).substr(2, 9);
-  };
-
-
-function getInfoFunctBlock(id){
-    return new Promise((resolve, reject) => {
-
-        setTimeout(() => {
-        let info = {id,title:"Фун Блок",discription:"Описание блока"}
-        resolve(info);
-        }, 1000);
-    
+// *Hook model node
+function useModelNode(id){
+    let node = window.state.dataTree.first({strategy: 'post'}, function (node) {
+        return node.model.id === id;
     });
+
+    const setDataInNode = (nameModel, data) => {
+        console.group(`Change Node id ${id}`);
+        console.log(`Model: ${nameModel}`);
+        console.log(`Past data:`, node.model[nameModel]);
+        node.model[nameModel] = data;
+        console.log(`Current data:`, node.model[nameModel]);
+        console.groupEnd();
+    }
+
+    return [node.model, setDataInNode];
 }
 
-function getInfoFunct(idParent, id){
-    return new Promise((resolve, reject) => {
-
-        setTimeout(() => {
-        let info = {idParent, id, title:"Функция", discription:"Описание функции", type:"struct"}
-        resolve(info);
-        }, 1000);
-    
+// *Hook model node function
+function useModelNodeFunction(idNode, idFunction){
+    let node = window.state.dataTree.first({strategy: 'post'}, function (node) {
+        return node.model.id === idNode;
     });
+
+    const objIndex = node.model.listfunct.findIndex((obj => obj.id === idFunction));
+    
+    let modelFunction = node.model.listfunct[objIndex];
+    const setDataInFunctionNode = (nameModel, data) => {
+        console.group(`Change Function id ${idFunction} Node ${idNode}`);
+        console.log(`Model: ${nameModel}`);
+        console.log(`Past data:`, node.model.listfunct[objIndex][nameModel]);
+        node.model.listfunct[objIndex][nameModel] = data;
+        console.log(`Current data:`, node.model.listfunct[objIndex][nameModel]);
+        console.groupEnd();
+    }
+    const removeFunctionNode = () => {
+        console.log(`Remove Function id ${idFunction} Node ${idNode}`);
+        node.model.listfunct = node.model.listfunct.filter(funct => funct.id !== idFunction);
+    }
+
+    return [modelFunction, setDataInFunctionNode, removeFunctionNode];
 }
 
+function turnLoading(){
+    if (window.state.lodingCircle === true) {
+        $("#loaderTreeContainer").removeClass("d-flex").addClass("d-none");
+        $("#displayContainer").css("display","block");
+        changeState("lodingCircle", false);
+        return false;
+
+    } else{
+        $("#loaderTreeContainer").removeClass("d-none").addClass("d-flex");
+        $("#displayContainer").css("display","none");
+        changeState(state, "lodingCircle", true)
+        return true;
+    }
+}
 
 function getDataTree(){
     return new Promise((resolve,reject) => {
-        let testdata = {
+        const testdata = {
             id:0,
             title:"Начало дерева",
             children:[
@@ -406,11 +136,18 @@ function getDataTree(){
                     discription:"Я блок ы",
                     listfunct:[
                         {
-                        id:1,
-                        title:"Функция 1",
-                        discription:" лалала",
-                        type:"single"
-                    }],
+                            id:1,
+                            title:"Функция 1",
+                            discription:" лалала",
+                            type:"single"
+                        },
+                        {
+                            id:2,
+                            title:"Функция 2",
+                            discription:" лалала",
+                            type:"single"
+                        },
+                    ],
                     children:[
                     {
                         id:2,
@@ -432,7 +169,20 @@ function getDataTree(){
                     id:4,
                     title:"Блок 2",
                     discription:"",
-                    listfunct:[],
+                    listfunct:[
+                        {
+                            id:1,
+                            title:"Функция 1",
+                            discription:" лалала",
+                            type:"single"
+                        },
+                        {
+                            id:2,
+                            title:"Функция 2",
+                            discription:" лалала",
+                            type:"single"
+                        },
+                    ],
                     children:[
                     {
                         id:5,
@@ -479,120 +229,156 @@ function getDataTree(){
     });
 }
 
+// Logic Functions
 
-$(document).ready(function() {
-    // reset svg each time 
-    $("#svg1").attr("height", "0");
-    $("#svg1").attr("width", "0");
-
+function showTree(){
     
-    getDataTree().then((treeData)=>{
-        $("#loaderTreeContainer").removeClass("d-flex").addClass("d-none");
-        $("#displayContainer").css("display","block");
-        data = treeData;
-        tree = new TreeModel();
-        root = tree.parse(data);
+    window.state.dataTree.walk(function(node){
+        const id = node.model.id;
+        const title = node.model.title;
+        const listFunct = node.model.listfunct;
 
-        showTree(root);  
-        setAllListner(tree, root);
+        console.log(`Имя : ${title}`);
+        
+        const path = node.getPath();
+        console.log(`Путь : `,path);
+        
+        if(path.length === 2)
+        {
+            addHTMLBlock($("#tree"), id, title);
+            showListFunct($("#tree"), id, listFunct);
+        }
+        else if(path.length >= 3)
+        {
+            const idParent = node.parent.model.id;
+            showChildBlock($("#tree"), idParent, id, title);
+            connectChildNode($("#tree"), idParent, id);
+            showListFunct($("#tree"), id, listFunct);
+        }
+        
         
 
-
-        $("#functionInfoModal #typeFunctionFormControlSelect").change(() => {
-            value = $(this).val();
-            if(value === "single" || value === "discription")
-                $("#functionInfoModal #functionInfoModalStruct").addClass("d-none")
-            else
-                $("#functionInfoModal #functionInfoModalStruct").removeClass("d-none");
-        });
-
-        $("#button-nav .mybtn-add").click(()=>{
-            
-            let callbackAddChild = (result) => {
-                let newdata = {id:getRandomInt(10,100), title:result, discription:""};
-                let idContanire = 0;
-                
-                addChildNode(tree, root, idContanire, newdata.id, newdata.title, newdata.discription);
-                
-                let nodeChild = getNode(root, newdata.id);
-                showPartTree([nodeChild], nodeChild.parent);
-            };
-            
-            promptModal("Создание нового функционального блока",
-            `Введите название нового функционального блока `,
-            "Новый блок", callbackAddChild);
-        });
     });
-});
-
-function setAllListner(tree,root){
-    setListanerOnUpdListFunct = 
-    function(all = true, node = null){
-        listFunct = all ? $(".block .parent .list-funct") : node.find(".parent .list-funct");
-        listFunct.arrive(".funct", function(newFunctItem){
-            setListnerOnFunctionTool(tree, root, "funct", $(newFunctItem));
-        });
-    }
-
-    setListnerOnNodeTool(tree,root);
-    setListnerOnFunctionTool(tree,root);
-    setListanerOnUpdListFunct();
-
-    $("#tree").arrive(".block", function(newitem){
-        setListnerOnNodeTool(tree, root, false, $(newitem));
-        setListnerOnFunctionTool(tree, root, "listfunct", $(newitem));
-        setListanerOnUpdListFunct(false, $(newitem));
-    });
-
 }
 
-function setListnerOnFunctionTool(tree,root,type = "all", node = null) {
+function showPartTree(idParent, childrens){
+    console.log("Test data:",[idParent, childrens]);
+    console.group(`show part tree in node id${idParent}`);
+    childrens.forEach((child)=>{
+        const id = child.id;
+        const title = child.title;
+        const listFunct = child.listfunct;
+        const nodeChild = getNode(id);
+        const path = nodeChild.getPath();
+        console.log(`Node id${id} path:`,path);
+        console.groupEnd();
 
-    button = 
-    function(tag){
-       return (
-        type === "all" ? $(`.funct .tool ${tag}`) :
-        type === "listfunct" ? node.find(`.parent .list-funct`).first().find(`.funct .tool ${tag}`) :
-        type === "funct" ? node.find(`.tool ${tag}`).first() :
-        console.warn(`type: ${type} not exist`) 
-        );
+        if(path.length === 2)
+        {
+            addHTMLBlock($("#tree"), id, title);
+            showListFunct($("#tree"), id, listFunct);
+        }
+        else if(path.length >= 3)
+        {
+            const idParentBlock = nodeChild.parent.model.id;
+            showChildBlock($("#tree"), idParentBlock, id, title);
+            connectChildNode($("#tree"), idParentBlock, id);
+            showListFunct($("#tree"), id, listFunct);
+        }
+
+        if(nodeChild.children.length > 0)
+            showPartTree(id, nodeChild.model.children);
+
+    });
+}
+
+function showListFunct (jqTree, idNode, listFuncts){
+    const jqNode = jqTree.find(`#block${idNode} .parent .list-funct `).first();
+    
+    listFuncts.forEach(function(elementFunct) {
+        addHTMLFunct(jqNode, idNode, elementFunct.id, elementFunct.title);
+    });
+}
+
+function showBlockFunct(idNode, id, title){
+    const jqNode = $(`#block${idNode} .parent .list-funct `).first();
+    addHTMLFunct(jqNode, idNode, id, title);
+}
+
+function showChildBlock(jqTree, idParent, id, title){
+    const jqParent = jqTree.find(`#block${idParent} .childrens `).first();
+    addHTMLBlock(jqParent, id, title);
+}
+
+
+
+// HTML Manipulation Functions
+
+function addHTMLFunct(jqNode, idNode, id, title){
+    const htmlblock=`
+    <div class="funct" id="funct${id}">
+
+              <div class="title">
+                <div class="text">
+                  ${title}
+                </div>
+              </div>
+
+              <div class="tool">
+                <button class="MyBtn MyBtn-info btn btn-outline-info btn-sm" >
+                 Информация
+                </button>
+                
+                <button class="MyBtn MyBtn-edit btn btn-outline-warning btn-sm">
+                 Редактировать
+                </button>
+
+                <button class="MyBtn MyBtn-remove btn btn-outline-danger btn-sm">
+                 Удалить
+                </button>
+              </div>
+
+    </div>`;
+
+    let jqEl = $(htmlblock);
+    setListnerOnFunctionTool(jqEl, id, idNode);
+    jqNode.append(jqEl);
+    
+}
+
+ 
+
+function setListnerOnFunctionTool(jqFuctional, idFuctional, idNode){
+   
+    jqFuctional.find(`.tool button`).click(function(){
+        console.log(`Была нажата кнопка на функции id:${idFuctional} элемента id:${idNode} с названем:${ $(this).text() } `);
+    });
+
+    const button = function(tag){
+        return jqFuctional.find(`.tool ${tag}`).first();
     }
 
-    getIdFunct=
-    function(jqButtonFunct){
-        parent = jqButtonFunct.parents(".funct").eq(0);
-        idparent = parent.attr("id");
-        id = parseInt(idparent.replace("funct",""));
-        return id
-    }
+    let [functModel, setFunctModel, removeFunctionNode] = useModelNodeFunction(idNode, idFuctional);
+   
 
-    button(".MyBtn-info").click(function(){
-        let idFunct = getIdFunct($(this));
-        let idNode = getIdNodeChild($(this));
-        console.log("Нажата функция под id: ",idFunct);
-        console.log("Родитель id:", idNode);
-
-        let node = getNode(root, idNode);
-        let objIndex = node.model.listfunct.findIndex((obj => obj.id === idFunct));
-        let functModel = node.model.listfunct[objIndex];
-        let callbackReady = (modals) => {
-            modals.find("#functionInfoModalTitle").text(functModel.title);
+    button(".MyBtn-info").click(()=>{
+        const callbackReadyInfo = (modals) => {
             let discriptionFormControlTextarea = modals.find("#discriptionFormControlTextarea");
             let typeFunctionFormControlSelect = modals.find("#typeFunctionFormControlSelect");
             let buttonSaveChange = modals.find(".mybtn-savechange");
             
             discriptionFormControlTextarea.val("");
             discriptionFormControlTextarea.val(functModel.discription);
-
+            
             typeFunctionFormControlSelect.val(functModel.type);
-            if(functModel.type === "single" || functModel.type === "discription")
+            if(functModel.type === "single" || functModel.type === "discription") // не меняеться тип
                 $("#functionInfoModal #functionInfoModalStruct").addClass("d-none")
             else
                 $("#functionInfoModal #functionInfoModalStruct").removeClass("d-none");
-
+            
             buttonSaveChange.click(()=>{
-                node.model.listfunct[objIndex].discription = discriptionFormControlTextarea.val();
-                node.model.listfunct[objIndex].type = typeFunctionFormControlSelect.val();
+                setFunctModel("discription", discriptionFormControlTextarea.val());
+                setFunctModel("type", typeFunctionFormControlSelect.val());
                 buttonSaveChange.off();
                 modals.modal('hide');
             });
@@ -603,253 +389,386 @@ function setListnerOnFunctionTool(tree,root,type = "all", node = null) {
             });
         }
 
-        openModal("functionInfoModal", callbackReady);
+        openModal("functionInfoModal", callbackReadyInfo);
+
     });
-    button(".MyBtn-remove").click(function(){
-        idNode = getIdNodeChild($(this));
-        idFunct = getIdFunct($(this));
-        node = getNode(root, idNode);
-        let callRemoveFunct = (result) =>{
+
+    button(".MyBtn-edit").click(()=>{
+        const callchangeTitle = (newTitle) => {
+            setFunctModel("title", newTitle);
+            jqFuctional.find(".title .text").text(newTitle);
+        }
+
+        promptModal("Новое название функции",
+        "Введите новое название функции", 
+        functModel.title, callchangeTitle);
+    });
+    
+    button(".MyBtn-remove").click(()=>{
+        const callRemoveFunction = (result) => {
             if(result){
-                node.model.listfunct = node.model.listfunct.filter(funct => funct.id !== idFunct);
-                removeBlockFunct(idNode, idFunct);
+                removeFunctionNode();
+                jqFuctional.remove();
             }
         }
+        
+        confirmModal("Удаление функции",
+        `Вы точно хотите удалить функцию id ${idFuctional} блока id ${idNode}`, 
+        callRemoveFunction);
 
-        confirmModal("Удаление функции",`Вы точно хотите удалить функцию `,callRemoveFunct);
-        
-        
     });
-    button(".MyBtn-edit").click(function(){
-        idNode = getIdNodeChild($(this));
-        idFunct = getIdFunct($(this));
-
-        node = getNode(root, idNode); 
-        objIndex = node.model.listfunct.findIndex((obj => obj.id === idFunct));
-
-        let changeTitle = (result) => {
-            console.log("Изменено");
-            node.model.listfunct[objIndex].title = result;
-            showChangeTitleBlockFunct(idNode, idFunct, result);
-        };
-
-        promptModal("Новое название функции", "Введите новое название функции", node.model.listfunct[objIndex].title, changeTitle);
-    })
 }
 
-function setListnerOnNodeTool(tree,root,all = true, node = null){
-
-    button = 
-    function(tag){
-       return all ? $(`.block .parent .node .tool ${tag}`) : node.find(`.parent .node .tool ${tag}`).first();
-    }
-
-    button(".MyBtn-info").click(function(){
-        let idNode = getIdNodeChild($(this));
-        console.log("Был нажат блок под id",idNode);
-        let node = getNode(root, idNode);
-
-        let callbackReady = (modals) => {
-            
-            modals.find("#nodeInfoModalTitle").text(node.model.title);
-            let discriptionFormControlTextarea = modals.find("#discriptionFormControlTextarea");
-            let buttonSaveChange = modals.find(".mybtn-savechange");
-            discriptionFormControlTextarea.val("");
-            discriptionFormControlTextarea.val(node.model.discription);
-
-            buttonSaveChange.click(()=>{
-                console.log(`Данные будут записанны в ф.б. id ${idNode}`,discriptionFormControlTextarea.val());
-                node.model.discription = discriptionFormControlTextarea.val();
-                buttonSaveChange.off();
-                modals.modal('hide');
-            });
-
-            modals.on('hide.bs.modal', () => {
-                buttonSaveChange.off();
-                modals.off("hide.bs.modal");   
-            });
-        };
-
-        openModal("nodeInfoModal", callbackReady);
-
-    });
- 
-    button(".MyBtn-addchild").click(function(){
-        
-        idNode = getIdNodeChild($(this));
-        nodeParent = getNode(root, idNode);
-        
-        let callbackAddChild = (result) => {
-            newdata = {id:getRandomInt(10,100),title:result,discription:""};
-            
-            addChildNode(tree,root,idNode,newdata.id,newdata.title, newdata.discription);
-            showChildBlock(idNode,newdata.id,newdata.title);
-            connectChildNode(idNode,newdata.id);
-            updatePath(root);
-        };
-        
-        promptModal("Создание нового функционального блока",
-        `Введите название нового функционального блока зависимового от блока "${nodeParent.model.title}" `,
-        "Новый блок", callbackAddChild);
-    });
-    button(".MyBtn-addfunct").click(function(){
-        idNode = getIdNodeChild($(this));
-        node = getNode(root,idNode);
-
-        let callbackAddFunct = (result) => {
-            newFunct = {id:getRandomInt(10,100), title:result, discription:"", type: "single"};
-            node.model.listfunct.push(newFunct);
-            showBlockFunct(idNode,newFunct.id,newFunct.title);
-        }
-
-        promptModal("Создание нового функции",
-        `Введите название новой функции функционального блока "${node.model.title}" `,
-        "Новая функция", callbackAddFunct);
-
-    });
-    button(".MyBtn-editchild").click(function(){
-        idNode = getIdNodeChild($(this));
-        node = getNode(root,idNode);
-
-        let callbackEditChild = (result) => {
-            node.model.title = result;
-            showChangeTitleBlock(idNode,result);
-        }
-
-        promptModal("Новое название функционального блока", "Введите новое название функционального блока", node.model.title, callbackEditChild);
-        
-
-    });
-    button(".MyBtn-move").click(function(){
-        idNode = getIdNodeChild($(this));
-        node = getNode(root,idNode);
-        children = node.children
-
-        
-
-        $(`#block${idNode} .node .title`).css("border-color","#ffc107");
-        $(`#block${idNode} .node .title`).css("background-color","#fff9e9");
-
-        allButton = $('.block .parent .node .tool .MyBtn')
-        allButton.prop("disabled",true);
-        allButton.addClass("d-none");
-
-        buttonPaste = $(`.block .node`).not($(`#block${idNode} .node`)).find(".MyBtn-paste");
-        buttonPaste.removeClass("d-none");
-        buttonPaste.prop("disabled",false);
-        buttonPaste.css("display","block");
-
-        buttonMoveToStart = $("#mybtn-movetostart");
-        buttonMoveToStart.removeClass("d-none");
-
-        updatePath(root);
-
-        buttonPaste.click(function(){
-            idContanire = getIdNodeChild($(this));
-            nodeContanire = getNode(root,idContanire);
-
-            removeConnectChildNodes(tree, root,[node]);
-            removeBlock(node.model.id);
-            removeNode(tree, root, idNode);
-            addChildNode(tree, root, idContanire, node.model.id, node.model.title, node.model.discription, node.model.children, node.model.listfunct);
-            
-            nodeChild = getNode(root,node.model.id);
-            
-            showPartTree([nodeChild],nodeChild.parent);
-            
-            buttonPaste.off("click");
-            buttonMoveToStart.off("click");
-            buttonPaste.css("display","none");
-            allButton.prop("disabled",false);
-            allButton.removeClass("d-none");
-            buttonMoveToStart.addClass("d-none");
-            updatePath(root);
-        });
-        
-        buttonMoveToStart.click(function(){
-            idContanire = 0;
-            nodeContanire = getNode(root,idContanire);
-
-            removeConnectChildNodes(tree, root,[node]);
-            removeBlock(node.model.id);
-            removeNode(tree, root, idNode);
-            addChildNode(tree, root, idContanire, node.model.id, node.model.title, node.model.discription, node.model.children, node.model.listfunct);
-            
-            nodeChild = getNode(root,node.model.id);
-            
-            showPartTree([nodeChild],nodeChild.parent);
-            
-            buttonMoveToStart.off("click");
-            buttonPaste.off("click");
-            buttonPaste.css("display","none");
-            allButton.prop("disabled",false);
-            allButton.removeClass("d-none");
-            buttonMoveToStart.addClass("d-none");
-            updatePath(root);
-        });
-
-    });
-
-    button(".MyBtn-remove").click(function(){
-        idNode = getIdNodeChild($(this));
-        removedNode = getNode(root, idNode); 
-        childrens = getChildrensNode(tree, root, idNode);
-        parentNode = getParentNode(tree, root, idNode)
-        idParent = parentNode.model.id;
-
-        let callRemoveFunctBlock = (result)=>{
-            if(result){
-                result = false;
-                // если дети есть
-                if(childrens.length > 0){
-                    result = true;
+function addHTMLBlock(jqParent, idNode, titleNode){
+    
+    const htmlBlock=`
+    <div class="block" id="block${idNode}">
+        <div class="parent">
+            <div class="node">
+                <div class="title">
+                    <div class="text">
+                        ${titleNode}
+                    </div>
+                </div>
+                <div class="tool">
+                    <button class="MyBtn MyBtn-info btn btn-outline-info btn-sm">
+                    Информация
+                    </button>
+                    <button class="MyBtn MyBtn-addchild btn btn-outline-success btn-sm">
+                    Добавить
+                    </button>
+                    <button class="MyBtn MyBtn-addfunct btn btn-outline-success btn-sm">
+                    Добавить Функцию
+                    </button>
                     
-                    childrens.forEach(function(node){
-                        removeBlock(node.model.id);
-                    });
-                    // удаление линий у дочерних и их зависимых блоков 
-    
-                    removeConnectChildNodes(tree, root, childrens);
-                }
-                removeConnectNode(idNode);
-                removeBlock(idNode);
-    
-                removeNode(tree, root, idNode);
-    
-                // Добавления дочерних объектов на место удаленного родителя
-                updatePath(root);
-                return result;
-                
-            }
-            return result;
-        }
+                    <button class="MyBtn MyBtn-editchild btn btn-outline-warning btn-sm">
+                    Редактировать
+                    </button>
+                    <button class="MyBtn MyBtn-move btn btn-outline-warning btn-sm">
+                    Вырезать
+                    </button>
+                    <button class="MyBtn MyBtn-paste btn btn-primary btn-sm" style="display:none;">
+                    Вставить
+                    </button>
 
+                    <button class="MyBtn MyBtn-remove btn btn-outline-danger btn-sm">
+                    Удалить
+                    </button>
+                </div>
+            </div>
 
-        let callRemoveChildFunctBlock = (on) => {
-            if(on){
-                childrens.forEach(function(node){
-                            
-                    addChildNode(tree, root, idParent, node.model.id, node.model.title, node.model.discription, node.model.children, node.model.listfunct);
-                });            
-                showPartTree(childrens,parentNode);
-                updatePath(root);
-            }
+            <div class="list-funct">
+            </div>
 
-        }
-        
-        confirmModal("Удаление функционального блока",`Вы точно хотите удалить функциональный блок ${removedNode.model.title}`,callRemoveFunctBlock).then((result)=>{
-            if(result)
-                confirmModal("Удаление функционального блока",`Вы хотите оставить дочерние объекты функционального блока?`,callRemoveChildFunctBlock);
-        });
-        
-    });
+        </div>
+
+        <div class="childrens">
+        </div>
+    </div>`;
+
+    let jqEl = $(htmlBlock);
+    setListnerOnNodeTool(jqEl, idNode);
+    jqParent.append(jqEl);
+
 }
 
-function getIdNodeChild(jqblockchild){
+function getIdNode(jqblockchild){
     parent = jqblockchild.parents(".block").eq(0);
     idparent = parent.attr("id");
     id = parseInt(idparent.replace("block",""));
     return id
 }
 
+function setListnerOnNodeTool(jqNode, idNode){
+   
+    jqNode.find(`.parent .node .tool button`).click(function(){
+        console.log(`Была нажата кнопка ${ $(this).text() } на элементе id:${idNode} `);
+    });
+
+    const button = function(tag){
+        return jqNode.find(`.parent .node .tool ${tag}`).first();
+    }
+
+    const addHTMLBlockChild = (id, title) => {
+        addHTMLBlock(jqNode.find(".childrens").first(), id, title);
+    }
+
+    const removeConnectChildNodes = (childrens) => {
+        childrens.forEach((child)=>{
+            removeConnect(child.id);
+            if(child.children.length > 0)
+                removeConnectChildNodes(child.children);
+        });
+    }
+
+
+    let [node, setDataInNode] = useModelNode(idNode); 
+
+    button(".MyBtn-info").click(()=>{
+        const callbackReadyInfo = (modals) => {
+            modals.find("#nodeInfoModalTitle").text(node.title);
+            let discriptionFormControlTextarea = modals.find("#discriptionFormControlTextarea");
+            let buttonSaveChange = modals.find(".mybtn-savechange");
+            discriptionFormControlTextarea.val("");
+            discriptionFormControlTextarea.val(node.discription);
+
+            buttonSaveChange.click(()=>{
+                setDataInNode("discription",discriptionFormControlTextarea.val());
+                buttonSaveChange.off();
+                modals.modal('hide');
+            });
+
+            modals.on('hide.bs.modal', () => {
+                buttonSaveChange.off();
+                modals.off("hide.bs.modal");   
+            });
+        }
+
+        openModal("nodeInfoModal", callbackReadyInfo);
+    });
+    button(".MyBtn-addchild").click(()=>{
+        const callbackAddChild = (result) => {
+            newdata = {id:getRandomInt(10,100), title:result, discription:"", listfunct:[], children:[]};
+            
+            addChildNode(idNode, newdata);
+            addHTMLBlockChild(newdata.id, result);
+            connectChildNode($("#tree"), idNode, newdata.id);
+            updatePath();
+        };
+
+        promptModal("Создание нового функционального блока",
+        `Введите название нового функционального блока зависимового от блока "${node.title}" `,
+        "Новый блок", callbackAddChild);
+    });
+    button(".MyBtn-addfunct").click(()=>{
+        const callbackAddFunct = (result) => {
+            newFunct = {id:getRandomInt(10,100), title:result, discription:"", type: "single"};
+            setDataInNode("listfunct",[...node.listfunct, newFunct]);
+            showBlockFunct(idNode,newFunct.id,newFunct.title); // mb remove
+        }
+
+        promptModal("Создание нового функции",
+        `Введите название новой функции функционального блока "${node.title}" `,
+        "Новая функция", callbackAddFunct);
+    });
+    button(".MyBtn-editchild").click(()=>{
+        const callbackEditNode = (result) => {
+            setDataInNode("title",result);
+            let title = jqNode.find(".parent .node .title .text").first();
+            title.text(node.title);
+        }
+
+        promptModal("Новое название функционального блока", "Введите новое название функционального блока", node.title, callbackEditNode);
+    });
+    button(".MyBtn-move").click(()=>{
+        $(`#block${idNode} .node .title`).css("border-color","#ffc107");
+        $(`#block${idNode} .node .title`).css("background-color","#fff9e9");
+        
+        const allButton = $('.block .parent .node .tool .MyBtn')
+        allButton.prop("disabled",true);
+        allButton.addClass("d-none");
+
+        const buttonPaste = $(`.block .node`).not($(`#block${idNode} .node`)).find(".MyBtn-paste");
+        buttonPaste.removeClass("d-none");
+        buttonPaste.prop("disabled",false);
+        buttonPaste.css("display","block");
+
+        const buttonMoveToStart = $("#mybtn-movetostart");
+        buttonMoveToStart.removeClass("d-none");
+
+        updatePath();
+        changeState("movingNode", getNode(idNode));
+        //*
+        buttonPaste.click(function(){
+            const idContanire = getIdNode($(this));
+            const node = window.state.movingNode.model;
+            const idNode = window.state.movingNode.model.id;
+
+            removeConnectChildNodes([node]);
+            $(`#block${idNode}`).remove();
+            removeNode(idNode);
+            addChildNode(idContanire, node);
+            
+            nodeChild = getNode(idNode);
+            
+            showPartTree(nodeChild.parent.model.id, [node]);
+
+            changeState("movingNode",null);
+            
+            buttonPaste.off("click");
+            buttonMoveToStart.off("click");
+            buttonPaste.css("display","none");
+            allButton.prop("disabled",false);
+            allButton.removeClass("d-none");
+            buttonMoveToStart.addClass("d-none");
+            updatePath();
+        });
+
+        buttonMoveToStart.click(function(){
+            const idContanire = 0;
+            const node = window.state.movingNode.model;
+            const idNode = window.state.movingNode.model.id;
+            
+            removeConnectChildNodes([node]);
+            $(`#block${idNode}`).remove();
+            removeNode(idNode);
+            addChildNode(idContanire, node);
+            
+            nodeChild = getNode(idNode);
+            
+            showPartTree(nodeChild.parent.model.id, [node]);
+
+            changeState("movingNode",null);
+            
+            buttonMoveToStart.off("click");
+            buttonPaste.off("click");
+            buttonPaste.css("display","none");
+            allButton.prop("disabled",false);
+            allButton.removeClass("d-none");
+            buttonMoveToStart.addClass("d-none");
+            updatePath(); 
+        });
+
+    });
+    button(".MyBtn-paste").click(()=>{});
+    button(".MyBtn-remove").click(()=>{
+        const childrens = node.children;
+        const parentNode = getParentNode(idNode);
+        const callRemoveNode = (result) => {
+            if(result){
+                result = false;
+                if(childrens.length > 0){
+                    result = true;
+
+                    childrens.forEach((child)=>{
+                        jqNode.find(`.childrens #block${child.id}`).remove();
+                        
+                    });
+                    removeConnectChildNodes(childrens);
+                }
+                removeConnect(idNode);
+                jqNode.remove();
+                removeNode(idNode);
+
+                updatePath();
+                return result;
+            }
+            return result;
+        }
+
+        const callRemoveChildNode = (on) => {
+            if(on){
+                childrens.forEach((node)=>{
+
+                    addChildNode(parentNode.model.id, node);
+                });
+                showPartTree(parentNode.model.id, childrens);
+                updatePath();
+            }
+        }
+
+        confirmModal("Удаление функционального блока",`Вы точно хотите удалить функциональный блок ${node.title}`,
+        callRemoveNode).then((result)=>{
+            if(result)
+                confirmModal("Удаление функционального блока",`Вы хотите оставить дочерние объекты функционального блока?`,
+                callRemoveChildNode);
+        });
+
+       
+    });
+}
+
+// SVG Logic Functions
+function removeConnect(idNode){
+    $(`#path${idNode}`).remove();
+}
+
+
+function updatePath(){
+    window.state.dataTree.walk((node)=>{
+        const path = node.getPath();
+
+        if(path.length >= 3){
+            const idChild = node.model.id;
+            const idParent = node.parent.model.id;
+            const svg = $("#svg1");
+            const path = $(`#path${idChild}`);
+
+            const startElem = $(`#block${idParent} .parent .node .title`).first();
+            const endElem = $(`#block${idChild} .parent .node .title`).first();
+            connectChild(svg, path, startElem, endElem);
+        }
+    });
+}
+
+
+function connectChildNode(jqTree, idParent, idChild){
+    const svg = $("#svg1");
+    createPath(svg,`path${idChild}`);
+
+    const path = $(`#path${idChild}`);
+    const startElem = jqTree.find(`#block${idParent} .parent .node .title`).first();
+    const endElem = jqTree.find(`#block${idChild} .parent .node .title`).first();
+    connectChild(svg, path, startElem, endElem);
+}
+
+function connectChild(svg, path, startElem, endElem) {
+    const svgContainer= svg;
+
+    // if first element is lower than the second, swap!
+    if(startElem.offset().top > endElem.offset().top){
+        let temp = startElem;
+        startElem = endElem;
+        endElem = temp;
+    }
+
+    // get (top, left) corner coordinates of the svg container   
+    const svgTop  = svgContainer.offset().top;
+    const svgLeft = svgContainer.offset().left;
+
+    // get (top, left) coordinates for the two elements
+    const startCoord = startElem.offset();
+    const endCoord   = endElem.offset();
+
+    // calculate path's start (x,y)  coords
+    // we want the x coordinate to visually result in the element's mid point
+    const startX = startCoord.left + 0.5*startElem.outerWidth() - svgLeft;    // x = left offset + 0.5*width - svg's left offset
+    const startY = startCoord.top  + startElem.outerHeight() - svgTop;        // y = top offset + height - svg's top offset
+
+        // calculate path's end (x,y) coords
+    const endX = endCoord.left  - svgLeft;
+    const endY = endCoord.top + 0.5*startElem.outerHeight() - svgTop;
+
+    // call function for drawing the path
+    drawPath(svg, path, startX, startY, endX, endY);
+
+}
+
+// SVG Manipulation Functions
+
+function createPath(svg, id){
+    
+    let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("id", id);
+    path.setAttribute("d", "M0 0");
+    path.setAttribute("stroke", "#000");
+    path.setAttribute("fill", "none");
+    path.setAttribute("stroke-width", "3px");
+    document.getElementById("svg1").appendChild(path);
+}
+
+function drawPath(svg, path, startX, startY, endX, endY) {
+    // get the path's stroke width (if one wanted to be  really precize, one could use half the stroke size)
+    const stroke =  parseFloat(path.attr("stroke-width"));
+    
+    // check if the svg is big enough to draw the path, if not, set heigh/width
+    if (svg.attr("height") <  endY)                 svg.attr("height", endY + stroke);
+    if (svg.attr("width" ) < (startX + stroke) )    svg.attr("width", (startX + stroke));
+    if (svg.attr("width" ) < (endX   + stroke) )    svg.attr("width", (endX   + stroke));
+    
+    path.attr("d", `M ${startX},${startY} 
+    l 0,${endY-startY-15} 
+    q 0,15 15,15
+    l ${endX-startX-15},0`);
+}
 
