@@ -58,17 +58,24 @@
                 <div class="tab-content" id="pills-tabContent">
                         <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-discription-tab">
                             <!--Discription-->
+                            
                             <div class="d-flex flex-column align-items-center ">
-                                <div id="info-data-created" class="card card-info">
-                                <div class="card-body">
-                                        <h5 class="card-title">Дата создания</h5>
-                                        <p class="card-text">2010-01-01</p>
+                                <div id="info-title" class="card card-info">
+                                  <div class="card-body">
+                                          <h5 class="card-title">Название</h5>
+                                          <p class="card-text">Проект</p>
+                                  </div>
                                 </div>
+                                <div id="info-data-created" class="card card-info">
+                                  <div class="card-body">
+                                          <h5 class="card-title">Дата создания</h5>
+                                          <p class="card-text">-</p>
+                                  </div>
                                 </div>
                                 <div id="info-discription" class="card card-info">
                                     <div class="card-body">
                                         <h5 class="card-title">Описание</h5>
-                                        <p class="card-text">ваыаываваывава ыаываыавававаыва  ыаывавываыаыы вавыаывава ываываыва</p>
+                                        <p class="card-text">-</p>
                                     </div>
                                 </div>
                             </div>
@@ -83,7 +90,30 @@
                         </div>
 
                         <div class="tab-pane fade" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab">
-
+                          <!--Setting-->
+                          <div class="d-flex flex-column align-items-center ">
+                            <div id="remove-proj" class="card card-info">
+                              <div class="card-body">
+                                      <h5 class="card-title">Удалить проект?</h5>
+                                      <button type="button" class="btn btn-danger">Удалить</button>
+                              </div>
+                            </div>
+                            <div class="card card-info">
+                                <div class="card-body">
+                                    <h5 class="card-title">Название</h5>
+                                    <input id="info-title-edit" class="form-control" type="text" placeholder="Default input">
+                                </div>
+                            </div>
+                            <div class="card card-info">
+                              <div class="card-body">
+                                  <h5 class="card-title">Описание</h5>
+                                  <textarea class="form-control" id="info-discription-edit" rows="3"></textarea>
+                              </div>
+                            </div>
+                            <div class="card-info">
+                              <button type="button" id="btn-info-save-changes" class="btn btn-primary ">Сохранить</button>
+                            </div>
+                          </div>
                         </div>
                 </div>
         </main>
