@@ -94,8 +94,11 @@ $(document).ready(function() {
 
             addProject(dataProjects, id, title, discription);
             addHtmlProject(dataProjects, id, title, discription);
-            modals.find("mybtn-saveAdd").off("click");
+            modals.find(".mybtn-saveAdd").off();
         });
+        modals.on('hidden.bs.modal',() => {
+            modals.find(".mybtn-saveAdd").off();
+        })
         modals.modal("show");
     });
 
